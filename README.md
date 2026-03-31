@@ -4,8 +4,8 @@
 
 - OS: MacOS Taheo 26.3
 - Shell: bash
-- Docker: 26.x
-- Git: 2.x
+- Docker: 26.0.1
+- Git: 2.43.0
 
 ## 2. 수행 체크리스트
 
@@ -33,7 +33,7 @@
 ### 트러블슈팅 1: 컨테이너 실행 즉시 종료
 
 - **문제**: `docker run` 실행 후 `docker ps`에 컨테이너가 안 보임. `docker ps -a`에서 `Exited (0)` 확인.
-- **원인 가설**: Dockerfile CMD에서 `daemon off` 없이 Nginx를 실행하면 백그라운드로 전환되어 Docker가 포그라운드 프로세스 없음으로 판단, 컨테이너 종료.
+- **원인 **: Dockerfile CMD에서 `daemon off` 없이 Nginx를 실행하면 백그라운드로 전환되어 Docker가 포그라운드 프로세스 없음으로 판단, 컨테이너 종료.
 - **확인**: `docker logs webserver` — 에러 없이 종료됨.
 - **해결**: `CMD ["nginx", "-g", "daemon off;"]`로 수정 후 재빌드.
 
