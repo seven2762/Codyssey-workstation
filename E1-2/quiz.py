@@ -8,11 +8,13 @@ from typing import Any
 class Quiz:
     question: str
     choices: list[str]
-    answer: int  # 1~4
+    answer: int
+    hint: str
 
     def __post_init__(self) -> None:
         self.question = self.question.strip()
         self.choices = [choice.strip() for choice in self.choices]
+        self.hint = self.hint.strip()
 
         if not self.question:
             raise ValueError("문제는 비어 있을 수 없습니다.")
@@ -22,6 +24,8 @@ class Quiz:
             raise ValueError("선택지는 비어 있을 수 없습니다.")
         if self.answer not in (1, 2, 3, 4):
             raise ValueError("정답 번호는 1~4 사이여야 합니다.")
+        if not self.hint:
+            raise ValueError("힌트는 비어 있을 수 없습니다.")
 
     def display(self, index: int | None = None) -> None:
         if index is not None:
@@ -41,6 +45,7 @@ class Quiz:
             "question": self.question,
             "choices": self.choices,
             "answer": self.answer,
+            "hint": self.hint,
         }
 
     @classmethod
@@ -49,4 +54,5 @@ class Quiz:
             question=str(data["question"]),
             choices=list(data["choices"]),
             answer=int(data["answer"]),
+            hint=str(data.get("hint", "기본 힌트가 없습니다.")),
         )
