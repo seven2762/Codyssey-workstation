@@ -328,6 +328,12 @@ $ curl http://localhost:8080
 ### 볼륨 생성 및 연결
 ```bash
 $ docker volume create my-data
+$ docker volume ls
+DRIVER    VOLUME NAME
+local     4a904864810cd027a20e39f563b8bc2ea093943d18137032fd02c3b4759c1c5c
+local     81e61b4c37c2c18cb79abd280d6ceab63609ebe1377f575e1b132e97efed00b4
+local     a42b870a2d1e6cfc366d3846ef6a5533fea5111087ec6559171cffca324a273e
+local     my-data
 
 $ docker run -d --name webserver-vol \
   -p 8081:80 \
