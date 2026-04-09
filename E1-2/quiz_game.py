@@ -21,7 +21,6 @@ class QuizGame:
             self.state_path = Path(state_path)
         self.input_func = input_func
         self.quizzes: list[Quiz] = []
-        self.best_score: int | None = None
         self.history: list[dict[str, str | int]] = []
         self.load_state()
 
@@ -129,30 +128,21 @@ class QuizGame:
                 data = json.load(file)
 
             quizzes_data = data.get("quizzes", [])
-            best_score = data.get("best_score", None)
             history_data = data.get("history", [])
-
 
             self.quizzes = [Quiz.from_dict(item) for item in quizzes_data]
             self.history = history_data
             if not self.quizzes:
                 self.quizzes = self.default_quizzes()
-
-            if best_score is None:
-                self.best_score = None
-            else:
-                self.best_score = int(best_score)
         except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError):
             print("데이터 파일을 읽는 중 문제가 발생했습니다. 기본 퀴즈 데이터로 복구합니다.")
             self.quizzes = self.default_quizzes()
-            self.best_score = None
             self.save_state(silent=True)
 
 
     def save_state(self, silent: bool = False) -> None:
         data = {
             "quizzes": [quiz.to_dict() for quiz in self.quizzes],
-            "best_score": self.best_score,
             "history": self.history,
         }
 
@@ -269,9 +259,13 @@ class QuizGame:
                 print(f"오답입니다. 정답은 {quiz.answer}번입니다.")
 
         print(f"\n퀴즈 종료! 점수: {score}/{len(selected_quizzes)}")
-        self.update_best_score(score)
+        previous_best = self.get_best_score()
         self.record_history(len(selected_quizzes), score)
         self.save_state(silent=True)
+        if previous_best is None or score > previous_best:
+            print("최고 점수가 갱신되었습니다!")
+        else:
+            print(f"현재 최고 점수는 {previous_best}점입니다.")
 
     def add_quiz(self) -> None:
         print("\n=== 새 퀴즈 추가 ===")
@@ -334,19 +328,18 @@ class QuizGame:
                 print(f"   {choice_index}) {choice}")
             print(f"   정답: {quiz.answer}번")
 
-    def update_best_score(self, score: int) -> None:
-        if self.best_score is None or score > self.best_score:
-            self.best_score = score
-            print("최고 점수가 갱신되었습니다!")
-        else:
-            print(f"현재 최고 점수는 {self.best_score}점입니다.")
+    def get_best_score(self) -> int | None:
+        if not self.history:
+            return None
+        return max(record["score"] for record in self.history)
 
     def show_best_score(self) -> None:
-        if self.best_score is None:
+        best = self.get_best_score()
+        if best is None:
             print("아직 퀴즈를 푼 기록이 없습니다.")
             return
 
-        print(f"현재 최고 점수는 {self.best_score}점입니다.")
+        print(f"현재 최고 점수는 {best}점입니다.")
 
     def show_history(self) -> None:
         if not self.history:

@@ -65,14 +65,29 @@
       ],
       "answer": 4,
       "hint": "정지된 상황에서 다시 시작하는 방식 중 하나다."
+    },
+    {
+      "question": "테스트 퀴즈 추가",
+      "choices": [
+        "테트선택지 1",
+        "테스택지 2",
+        "테스트 선택지 3",
+        "테스트 선택지 4"
+      ],
+      "answer": 4,
+      "hint": "테스트"
     }
   ],
-  "best_score": 5,
   "history": [
     {
       "played_at": "2026-04-02 08:00:16",
       "question_count": 1,
       "score": 1
+    },
+    {
+      "played_at": "2026-04-09 20:02:19",
+      "question_count": 3,
+      "score": 3
     }
   ]
 }
