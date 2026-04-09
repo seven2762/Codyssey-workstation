@@ -10,7 +10,7 @@ from quiz import Quiz
 
 
 class QuizGame:
-      def __init__(
+    def __init__(
         self,
         state_path: str | Path | None = None,
         input_func: Callable[[str], str] = input,
