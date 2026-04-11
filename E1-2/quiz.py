@@ -6,16 +6,20 @@ from typing import Any
 
 @dataclass
 class Quiz:
-    question: str
-    choices: list[str]
-    answer: int
-    hint: str
+    """퀴즈 한 문제를 표현하는 데이터 클래스"""
+    question: str       # 문제 텍스트
+    choices: list[str]  # 4개의 선택지 리스트
+    answer: int         # 정답 번호 (1~4)
+    hint: str           # 힌트 텍스트
 
     def __post_init__(self) -> None:
+        """객체 생성 직후 자동 호출되어 데이터 정제 및 유효성 검증을 수행한다."""
+        # 앞뒤 공백 제거
         self.question = self.question.strip()
         self.choices = [choice.strip() for choice in self.choices]
         self.hint = self.hint.strip()
 
+        # 유효성 검증 — 조건 불충족 시 ValueError 예외를 던진다
         if not self.question:
             raise ValueError("문제는 비어 있을 수 없습니다.")
         if len(self.choices) != 4:
@@ -28,6 +32,7 @@ class Quiz:
             raise ValueError("힌트는 비어 있을 수 없습니다.")
 
     def display(self, index: int | None = None) -> None:
+        """문제와 선택지를 콘솔에 출력한다. index가 있으면 문제 번호도 함께 출력한다."""
         if index is not None:
             print(f"\n[{index}번 문제]")
         else:
@@ -38,9 +43,11 @@ class Quiz:
             print(f"  {i}. {choice}")
 
     def is_correct(self, user_answer: int) -> bool:
+        """사용자 입력과 정답을 비교하여 정답 여부를 반환한다."""
         return user_answer == self.answer
 
     def to_dict(self) -> dict[str, Any]:
+        """Quiz 객체를 딕셔너리로 변환한다. (직렬화 — JSON 저장용)"""
         return {
             "question": self.question,
             "choices": self.choices,
@@ -50,6 +57,7 @@ class Quiz:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Quiz":
+        """딕셔너리를 받아서 Quiz 객체를 생성하여 반환한다. (역직렬화 — JSON 로드용)"""
         return cls(
             question=str(data["question"]),
             choices=list(data["choices"]),
