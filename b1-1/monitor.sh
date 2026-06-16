@@ -102,7 +102,10 @@ check_firewall() {
     # UFW 확인
     if command -v ufw &>/dev/null; then
         fw_status=$(ufw status 2>/dev/null | grep -i "Status:" | awk '{print $2}')
-        if [ "${fw_status,,}" != "active" ]; then
+        if [ -z "${fw_status}" ] && [ -r /etc/ufw/ufw.conf ]; then
+            fw_status=$(awk -F= '/^ENABLED=/{print $2}' /etc/ufw/ufw.conf)
+        fi
+        if [ "${fw_status,,}" != "active" ] && [ "${fw_status,,}" != "yes" ]; then
             echo "[${TIMESTAMP}] [WARNING] UFW 방화벽이 비활성 상태입니다." | tee -a "${LOG_FILE}"
         fi
         return

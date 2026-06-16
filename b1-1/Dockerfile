@@ -77,7 +77,7 @@ RUN chown agent-admin:agent-common /home/agent-admin/agent-app/upload_files && \
     chmod 770 /home/agent-admin/agent-app/upload_files
 
 # api_keys: agent-core ONLY
-RUN chown agent-admin:agent-core /home/agent-admin/agent-app/api_keys && \
+RUN chown -R agent-admin:agent-core /home/agent-admin/agent-app/api_keys && \
     chmod 770 /home/agent-admin/agent-app/api_keys && \
     chmod o-rwx /home/agent-admin/agent-app/api_keys && \
     chmod 640 /home/agent-admin/agent-app/api_keys/t_secret.key
