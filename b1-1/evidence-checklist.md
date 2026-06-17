@@ -1,6 +1,7 @@
 # Agent App 필수 증거 자료 체크리스트
 
 작성일: 2026-06-16
+문서 보강일: 2026-06-17
 검증 컨테이너: `b1-agent-proof-20260616-1920`
 검증 기준 시각: UTC
 
@@ -17,8 +18,17 @@
 | 그룹 멤버십 | 완료 | `agent-common`: admin/dev/test, `agent-core`: admin/dev 확인 |
 | 디렉토리 구조/권한 | 완료 | 앱/업로드/API 키/bin/log 디렉토리 권한 확인 |
 | ACL 설정 | 완료 | `getfacl`에서 `agent-common`, `agent-core` ACL 확인 |
+| 환경 변수 구성 | 완료 | `AGENT_HOME`, `AGENT_PORT`, `AGENT_UPLOAD_DIR`, `AGENT_KEY_PATH`, `AGENT_LOG_DIR` 설정 확인 |
+| 키 파일 생성 | 완료 | `$AGENT_HOME/api_keys/t_secret.key`, 내용 `agent_api_key_test` |
+| 일반 계정 실행 | 완료 | Boot 로그에서 `agent-admin` 실행 확인 |
 | 앱 Boot Sequence 5단계 | 완료 | `[1/5]`부터 `[5/5]`까지 모두 `[OK]` 확인 |
 | `Agent READY` | 완료 | 부팅 로그에서 `Agent READY` 확인 |
+| 앱 포트 LISTEN | 완료 | `0.0.0.0:15034` LISTEN 확인 |
+| monitor.sh 파일 정책 | 완료 | 경로 `$AGENT_HOME/bin/monitor.sh`, 소유자 `agent-dev`, 그룹 `agent-core`, 권한 `750` 확인 |
+| monitor.sh Health Check | 완료 | 프로세스/포트 비정상 시 `[ERROR]` 후 `exit 1` 로직 확인 |
+| monitor.sh 방화벽 경고 | 완료 | UFW/firewalld 비활성 시 `[WARNING]`, 종료하지 않음 |
+| monitor.sh 자원/임계값 | 완료 | CPU/MEM/DISK_USED 수집 및 CPU>20, MEM>10, DISK_USED>80 경고 로직 확인 |
+| monitor.log 용량 관리 | 완료 | 스크립트 로직으로 최대 10MB/10개 파일 유지 |
 | `monitor.sh` 실행 결과 | 완료 | CPU/MEM 경고 및 PID/자원 로그 기록 확인 |
 | `monitor.log` 누적 기록 | 완료 | 최근 라인에서 `PID`, `CPU`, `MEM`, `DISK_USED` 확인 |
 | crontab 매분 등록 | 완료 | `* * * * * /bin/bash .../monitor.sh` 확인 |
@@ -185,7 +195,91 @@ All Boot Checks Passed!
 Agent READY
 ```
 
-## 7. monitor.sh 실행 결과
+확인 내용:
+
+- 일반 계정 실행: `agent-admin`
+- 환경 변수 검증: `[2/5] Verifying Environment Variables [OK]`
+- 키 파일 검증: `[3/5] Checking Required Files [OK]`
+- 종료 참고: 수동 종료 시 `Ctrl+C`
+
+## 7. 환경 변수 및 키 파일
+
+설정값:
+
+```text
+AGENT_HOME=/home/agent-admin/agent-app
+AGENT_PORT=15034
+AGENT_UPLOAD_DIR=/home/agent-admin/agent-app/upload_files
+AGENT_KEY_PATH=/home/agent-admin/agent-app/api_keys/t_secret.key
+AGENT_LOG_DIR=/var/log/agent-app
+```
+
+키 파일:
+
+```text
+경로: /home/agent-admin/agent-app/api_keys/t_secret.key
+내용: agent_api_key_test
+권한: -rw-r----- 1 agent-admin agent-core
+```
+
+앱 LISTEN 확인:
+
+```text
+tcp   LISTEN 0      1            0.0.0.0:15034      0.0.0.0:*
+```
+
+## 8. monitor.sh 파일 정책 및 로직 확인
+
+파일 정책:
+
+```text
+경로: /home/agent-admin/agent-app/bin/monitor.sh
+소유자: agent-dev
+그룹: agent-core
+권한: 750 (rwxr-x---)
+cron 실행 계정: agent-admin
+```
+
+구현 확인:
+
+```text
+APP_PROCESS="agent-app"
+AGENT_PORT="${AGENT_PORT:-15034}"
+LOG_FILE="${AGENT_LOG_DIR}/monitor.log"
+MAX_LOG_SIZE_MB=10
+MAX_LOG_FILES=10
+```
+
+Health Check:
+
+```text
+프로세스 'agent-app' 미실행 시 [ERROR] 기록 후 exit 1
+TCP 15034 미LISTEN 시 [ERROR] 기록 후 exit 1
+```
+
+경고 조건:
+
+```text
+UFW/firewalld 비활성: [WARNING], 종료하지 않음
+CPU > 20%: [WARNING]
+MEM > 10%: [WARNING]
+DISK_USED > 80%: [WARNING]
+```
+
+로그 형식:
+
+```text
+[YYYY-MM-DD HH:MM:SS] PID:... CPU:..% MEM:..% DISK_USED:..%
+```
+
+로그 용량 관리:
+
+```text
+monitor.log가 10MB 이상이면 monitor.log.1부터 순환
+최대 보관 파일 수: 10개
+```
+
+## 9. monitor.sh 실행 결과
 
 검증 명령:
 
@@ -208,7 +302,7 @@ docker exec b1-agent-proof-20260616-1920 bash -lc '/bin/bash /home/agent-admin/a
 - 리소스 확인: `CPU`, `MEM`, `DISK_USED` 기록
 - 경고 확인: CPU/MEM 임계값 초과 경고 기록
 
-## 8. monitor.log 누적 기록 최근 라인
+## 10. monitor.log 누적 기록 최근 라인
 
 검증 결과:
 
@@ -223,7 +317,7 @@ docker exec b1-agent-proof-20260616-1920 bash -lc '/bin/bash /home/agent-admin/a
 [2026-06-16 11:00:01] PID:1 CPU:100.0% MEM:24.4% DISK_USED:5%
 ```
 
-## 9. crontab 등록 및 자동 실행 확인
+## 11. crontab 등록 및 자동 실행 확인
 
 crontab 등록 확인:
 
@@ -257,4 +351,3 @@ cron 최근 라인:
 [2026-06-16 11:00:01] [WARNING] CPU 사용률 100.0% > 임계값 20%
 [2026-06-16 11:00:01] [WARNING] MEM 사용률 24.4% > 임계값 10%
 ```
-

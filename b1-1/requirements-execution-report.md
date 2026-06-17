@@ -1,6 +1,7 @@
 # Agent App 요구사항 수행 내역서
 
 작성일: 2026-06-16
+문서 보강일: 2026-06-17
 검증 환경: Docker/Colima, Ubuntu 24.04 컨테이너, linux/amd64
 검증 이미지: `b1-agent-app:proof`
 최종 검증 컨테이너: `b1-agent-proof-20260616-1920`
@@ -17,8 +18,11 @@ Agent App 실행 환경을 Docker 이미지로 구성하고 다음 항목을 설
 - 앱 디렉토리, 업로드 디렉토리, API 키 디렉토리, 모니터링 스크립트 디렉토리, 로그 디렉토리를 생성했다.
 - 디렉토리 권한과 ACL을 설정했다.
 - 앱 실행에 필요한 환경 변수를 설정했다.
+- 키 파일 `$AGENT_HOME/api_keys/t_secret.key`를 생성하고 `agent_api_key_test` 1줄을 기록했다.
+- 앱을 root가 아닌 일반 계정 `agent-admin`으로 실행했다.
 - `monitor.sh`를 배치하고 `agent-admin` crontab에 매분 실행되도록 등록했다.
 - 앱 Boot Sequence 5단계 `[OK]`와 `Agent READY`를 확인했다.
+- 앱이 `0.0.0.0:15034`로 LISTEN 상태임을 확인했다.
 
 ## 2. 설정/명령어 기록
 
@@ -127,6 +131,42 @@ AGENT_LOG_DIR=/var/log/agent-app
 AGENT_KEY_PATH=/home/agent-admin/agent-app/api_keys/t_secret.key
 ```
 
+### 키 파일
+
+앱에서 요구하는 API 키 파일을 다음 경로와 내용으로 생성했다.
+
+```bash
+echo 'agent_api_key_test' > /home/agent-admin/agent-app/api_keys/t_secret.key
+```
+
+- 경로: `$AGENT_HOME/api_keys/t_secret.key`
+- 내용: `agent_api_key_test` 1줄
+- 권한: `640`
+- 소유/그룹: `agent-admin:agent-core`
+
+### 앱 실행
+
+앱은 root가 아닌 `agent-admin` 계정으로 실행했다.
+
+```bash
+su -s /bin/bash agent-admin -c '
+  export AGENT_HOME=/home/agent-admin/agent-app
+  export AGENT_PORT=15034
+  export AGENT_UPLOAD_DIR=/home/agent-admin/agent-app/upload_files
+  export AGENT_KEY_PATH=/home/agent-admin/agent-app/api_keys/t_secret.key
+  export AGENT_LOG_DIR=/var/log/agent-app
+  cd ${AGENT_HOME}
+  ./agent-app
+'
+```
+
+성공 기준:
+
+- Boot Sequence 5단계가 모두 `[OK]`
+- 마지막에 `Agent READY` 출력
+- 앱이 `0.0.0.0:15034`로 LISTEN
+- 수동 종료 시 `Ctrl+C` 사용
+
 ### cron
 
 `agent-admin` 사용자 crontab에 `monitor.sh` 매분 실행을 등록했다.
@@ -134,6 +174,46 @@ AGENT_KEY_PATH=/home/agent-admin/agent-app/api_keys/t_secret.key
 ```bash
 echo '* * * * * /bin/bash /home/agent-admin/agent-app/bin/monitor.sh >> /var/log/agent-app/cron.log 2>&1' | crontab -u agent-admin -
 ```
+
+### monitor.sh
+
+`monitor.sh`는 `$AGENT_HOME/bin/monitor.sh`에 배치했다.
+
+- 소유자: `agent-dev`
+- 그룹: `agent-core`
+- 권한: `750` (`rwxr-x---`)
+- cron 실행 계정: `agent-admin`
+- `agent-admin`은 `agent-core` 그룹에 포함되어 실행 가능
+
+Health Check:
+
+- 프로세스: 제공 앱 바이너리명 `agent-app` 실행 상태 확인
+- 포트: TCP `15034` LISTEN 상태 확인
+- 프로세스 또는 포트 확인 실패 시 `[ERROR]`를 기록하고 `exit 1`
+
+상태 점검:
+
+- UFW/firewalld 활성화 상태 점검
+- 비활성 상태면 `[WARNING]` 출력
+- 방화벽 경고는 스크립트 종료 조건이 아님
+
+자원 수집:
+
+- CPU 사용률 `%`
+- 메모리 사용률 `%`
+- Root partition 디스크 사용률 `%`
+
+임계값 경고:
+
+- `CPU > 20%`: `[WARNING]`
+- `MEM > 10%`: `[WARNING]`
+- `DISK_USED > 80%`: `[WARNING]`
+
+로그:
+
+- 로그 파일: `/var/log/agent-app/monitor.log`
+- 로그 포맷: `[YYYY-MM-DD HH:MM:SS] PID:... CPU:..% MEM:..% DISK_USED:..%`
+- 로그 용량 관리: 스크립트 자체 로직으로 `monitor.log` 최대 10MB, 로테이션 파일 최대 10개 유지
 
 ## 3. 빌드/실행/검증 명령 기록
 
@@ -168,4 +248,3 @@ docker exec b1-agent-proof-20260616-1920 bash -lc 'crontab -u agent-admin -l; wc
 - 비root 실행 시: `/etc/ufw/ufw.conf`의 `ENABLED=yes`를 fallback으로 확인
 
 또한 API 키 파일 권한 증거가 디렉토리 그룹 정책과 일치하도록 `api_keys` 하위 파일까지 `agent-core` 그룹 소유가 되도록 보완했다.
-
