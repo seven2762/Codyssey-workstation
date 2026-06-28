@@ -85,7 +85,7 @@ check_process() {
 # =============================================================================
 check_port() {
     local listen_check
-    listen_check=$(ss -tulnp 2>/dev/null | grep "LISTEN" | grep ":${AGENT_PORT}")
+    listen_check=$(ss -tulnp 2>/dev/null | grep "LISTEN" | grep -E ":${AGENT_PORT}\b")
 
     if [ -z "${listen_check}" ]; then
         echo "[${TIMESTAMP}] [ERROR] TCP ${AGENT_PORT} 포트가 LISTEN 상태가 아닙니다. 모니터링을 종료합니다." | tee -a "${LOG_FILE}"

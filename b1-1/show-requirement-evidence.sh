@@ -87,8 +87,8 @@ show_monitor_health() {
     ${SUDO} chown agent-admin:agent-core "${tmp_dir}" 2>/dev/null || true
     ${SUDO} chmod 770 "${tmp_dir}" 2>/dev/null || true
 
-    printf '\n$ sudo -u agent-admin env AGENT_PORT=1 AGENT_LOG_DIR=%s /bin/bash %s\n' "${tmp_dir}" "${MONITOR_PATH}"
-    run_as_agent_admin env AGENT_PORT=1 AGENT_LOG_DIR="${tmp_dir}" /bin/bash "${MONITOR_PATH}"
+    printf '\n$ sudo -u agent-admin env AGENT_PORT=65000 AGENT_LOG_DIR=%s /bin/bash %s\n' "${tmp_dir}" "${MONITOR_PATH}"
+    run_as_agent_admin env AGENT_PORT=65000 AGENT_LOG_DIR="${tmp_dir}" /bin/bash "${MONITOR_PATH}"
     local exit_code=$?
     printf '$ echo $?\n%s\n' "${exit_code}"
 
