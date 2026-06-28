@@ -37,7 +37,7 @@
 OrbStack machine 안에서 다음 명령을 실행한다.
 
 ```bash
-cd <repository>/b1-1
+cd "${HOME}/Codyssey-workstation/b1-1"
 sudo ./verify-orbstack.sh
 ```
 

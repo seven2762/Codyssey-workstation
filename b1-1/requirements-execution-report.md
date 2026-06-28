@@ -30,13 +30,17 @@ orb create --arch amd64 ubuntu:noble b1-agent
 orb -m b1-agent
 ```
 
-저장소 clone 후 프로비저닝:
+bootstrap 스크립트 실행:
 
 ```bash
-git clone <repository-url>
-cd <repository>/b1-1
-sudo ./provision-orbstack.sh
+sudo apt-get update
+sudo apt-get install -y curl
+curl -fsSL https://raw.githubusercontent.com/seven2762/Codyssey-workstation/b1-1/bootstrap-orbstack.sh -o bootstrap-orbstack.sh
+chmod +x bootstrap-orbstack.sh
+./bootstrap-orbstack.sh
 ```
+
+bootstrap 스크립트는 `https://github.com/seven2762/Codyssey-workstation.git` 저장소의 `b1-1` 브랜치를 `${HOME}/Codyssey-workstation`에 clone/update한 뒤 `b1-1/provision-orbstack.sh`를 실행한다.
 
 주의: 프로비저닝 스크립트는 미션 전용 machine을 전제로 `ufw --force reset`을 실행한다. 기존 서비스가 함께 동작하는 공용 서버나 운영 VM에서는 사용하지 않는다.
 
