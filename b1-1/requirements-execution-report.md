@@ -21,6 +21,7 @@
 - `systemd` 서비스로 앱을 관리한다.
 - `monitor.sh`를 배치하고 `agent-admin` crontab에 매분 실행되도록 등록한다.
 - `check-permissions.sh`로 `agent-admin`, `agent-dev`, `agent-test`의 권한 분리를 검증한다.
+- `show-requirement-evidence.sh`로 필수 평가 항목별 검증 명령과 출력을 수집한다.
 
 ## 2. 실행 절차
 
@@ -122,6 +123,7 @@ usermod -aG agent-core agent-dev
 - `/var/log/agent-app`: `agent-admin:agent-core`, `770`
 - `monitor.sh`: `agent-dev:agent-core`, `750`
 - `check-permissions.sh`: `agent-dev:agent-core`, `750`
+- `show-requirement-evidence.sh`: `agent-dev:agent-core`, `750`
 
 ACL:
 
@@ -193,6 +195,7 @@ systemctl status agent-app --no-pager
 crontab -u agent-admin -l
 tail -n 10 /var/log/agent-app/monitor.log
 sudo /home/agent-admin/agent-app/bin/check-permissions.sh
+sudo /home/agent-admin/agent-app/bin/show-requirement-evidence.sh
 ```
 
 ## 5. Docker capability와 VM의 차이

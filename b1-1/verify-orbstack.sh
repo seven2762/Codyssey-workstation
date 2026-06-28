@@ -47,7 +47,8 @@ ${SUDO} ls -ld \
 ${SUDO} ls -l \
     "${AGENT_HOME}/api_keys/t_secret.key" \
     "${AGENT_HOME}/bin/monitor.sh" \
-    "${AGENT_HOME}/bin/check-permissions.sh"
+    "${AGENT_HOME}/bin/check-permissions.sh" \
+    "${AGENT_HOME}/bin/show-requirement-evidence.sh"
 
 section "ACL"
 ${SUDO} getfacl -p \

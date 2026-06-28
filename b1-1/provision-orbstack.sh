@@ -95,6 +95,7 @@ configure_files() {
     install -o agent-admin -g agent-admin -m 755 "${SCRIPT_DIR}/agent-app" "${AGENT_HOME}/agent-app"
     install -o agent-dev -g agent-core -m 750 "${SCRIPT_DIR}/monitor.sh" "${AGENT_HOME}/bin/monitor.sh"
     install -o agent-dev -g agent-core -m 750 "${SCRIPT_DIR}/check-permissions.sh" "${AGENT_HOME}/bin/check-permissions.sh"
+    install -o agent-dev -g agent-core -m 750 "${SCRIPT_DIR}/show-requirement-evidence.sh" "${AGENT_HOME}/bin/show-requirement-evidence.sh"
 
     printf 'agent_api_key_test\n' > "${AGENT_KEY_PATH}"
     chown agent-admin:agent-core "${AGENT_KEY_PATH}"

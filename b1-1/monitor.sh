@@ -45,6 +45,12 @@ rotate_log() {
     local max_bytes=$(( MAX_LOG_SIZE_MB * 1024 * 1024 ))
 
     if [ "${file_size_bytes}" -ge "${max_bytes}" ]; then
+        # 최대 개수 초과 파일 삭제
+        local oldest="${LOG_FILE}.${MAX_LOG_FILES}"
+        if [ -f "${oldest}" ]; then
+            rm -f "${oldest}" 2>/dev/null
+        fi
+
         # 기존 로테이션 파일들을 한 단계씩 밀기
         for i in $(seq $(( MAX_LOG_FILES - 1 )) -1 1); do
             local src="${LOG_FILE}.${i}"
@@ -53,12 +59,6 @@ rotate_log() {
                 mv "${src}" "${dst}" 2>/dev/null
             fi
         done
-
-        # 최대 개수 초과 파일 삭제
-        local oldest="${LOG_FILE}.${MAX_LOG_FILES}"
-        if [ -f "${oldest}" ]; then
-            rm -f "${oldest}" 2>/dev/null
-        fi
 
         # 현재 로그를 .1로 이동
         mv "${LOG_FILE}" "${LOG_FILE}.1" 2>/dev/null

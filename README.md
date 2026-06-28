@@ -23,6 +23,7 @@ VM에서는 UFW, SSH, cron, 사용자/그룹, ACL이 실제 OS의 운영 관리 
 | `b1-1/provision-orbstack.sh` | OrbStack Ubuntu machine 안에서 서버 환경을 구성하는 프로비저닝 스크립트 |
 | `b1-1/verify-orbstack.sh` | SSH/UFW/계정/권한/ACL/service/cron/monitor 로그 검증 스크립트 |
 | `b1-1/check-permissions.sh` | `agent-admin`, `agent-dev`, `agent-test` 계정별 권한 검증 스크립트 |
+| `b1-1/show-requirement-evidence.sh` | 필수 평가 항목별 검증 명령과 출력을 모아 보여주는 증거 수집 스크립트 |
 | `bootstrap-orbstack.sh` | 저장소 clone/update 후 `b1-1/provision-orbstack.sh`를 실행하는 bootstrap 스크립트 |
 | `b1-1/monitor.sh` | 프로세스/포트/방화벽/CPU/MEM/DISK 점검 및 로그 기록 |
 | `b1-1/agent-app` | 제공된 x86_64 Linux 실행 바이너리 |
@@ -75,6 +76,18 @@ TARGET_DIR=/opt/Codyssey-workstation ./bootstrap-orbstack.sh
 
 ```bash
 sudo ./verify-orbstack.sh
+```
+
+필수 평가 항목별 검증 명령과 출력을 한 번에 보려면 다음 명령을 실행합니다. cron 자동 증가 확인 때문에 기본적으로 70초 대기합니다.
+
+```bash
+sudo /home/agent-admin/agent-app/bin/show-requirement-evidence.sh
+```
+
+대기 시간을 줄여 빠르게 출력만 확인하려면 다음처럼 실행할 수 있습니다.
+
+```bash
+sudo CRON_WAIT_SECONDS=5 /home/agent-admin/agent-app/bin/show-requirement-evidence.sh
 ```
 
 개별 확인 명령:

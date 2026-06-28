@@ -32,6 +32,7 @@
 | `monitor.log` 누적 기록 | 준비 | 최근 라인에서 `PID`, `CPU`, `MEM`, `DISK_USED` 확인 |
 | crontab 매분 등록 | 준비 | `* * * * * /bin/bash .../monitor.sh` 확인 |
 | cron 자동 실행 확인 | 준비 | 70초 후 `monitor.log`, `cron.log` 라인 증가 확인 |
+| 통합 요구사항 증거 수집 | 준비 | `show-requirement-evidence.sh` 출력 확인 |
 
 ## 통합 검증
 
@@ -40,6 +41,7 @@ OrbStack machine 안에서 다음 명령을 실행한다.
 ```bash
 cd "${HOME}/Codyssey-workstation/b1-1"
 sudo ./verify-orbstack.sh
+sudo /home/agent-admin/agent-app/bin/show-requirement-evidence.sh
 ```
 
 ## 개별 증거 수집 명령
@@ -140,7 +142,26 @@ agent-dev: upload/key/log/monitor 접근 OK
 agent-test: upload 접근 OK, key/log/monitor 접근 DENIED
 ```
 
-### 11. cron 매분 실행 및 로그 증가 증거
+### 11. 통합 요구사항 증거 수집
+
+```bash
+sudo /home/agent-admin/agent-app/bin/show-requirement-evidence.sh
+```
+
+확인 항목:
+
+```text
+SSH 20022/root 차단
+UFW active 및 20022/tcp, 15034/tcp만 허용
+계정/그룹/권한 구성
+Boot Sequence [1/5]~[5/5] [OK] 및 Agent READY
+monitor.sh 정상/비정상 상태 검증
+monitor.log 지정 포맷
+cron 자동 증가
+monitor.log 10MB/10개 로테이션
+```
+
+### 12. cron 매분 실행 및 로그 증가 증거
 
 ```bash
 sudo crontab -u agent-admin -l
