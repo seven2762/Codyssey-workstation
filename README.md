@@ -96,6 +96,7 @@ TARGET_DIR=/opt/Codyssey-workstation ./bootstrap-orbstack.sh
 - `agent-common`, `agent-core` 그룹 생성 및 멤버십 설정
 - 앱/업로드/API 키/bin/log 디렉토리 생성
 - 디렉토리 권한과 ACL 설정
+- `/usr/local/bin`에 검증 스크립트 심볼릭 링크 생성
 - `/etc/agent-app/agent-app.env` 환경 변수 파일 생성
 - `agent-app`을 `agent-admin` 계정의 `systemd` 서비스로 실행
 - `agent-admin` crontab에 `monitor.sh` 매분 실행 등록
@@ -109,13 +110,13 @@ sudo ./verify-orbstack.sh
 필수 평가 항목별 검증 명령과 출력을 한 번에 보려면 다음 명령을 실행합니다. cron 자동 증가 확인 때문에 기본적으로 70초 대기합니다.
 
 ```bash
-sudo /home/agent-admin/agent-app/bin/show-requirement-evidence.sh
+sudo show-requirement-evidence.sh
 ```
 
 대기 시간을 줄여 빠르게 출력만 확인하려면 다음처럼 실행할 수 있습니다.
 
 ```bash
-sudo CRON_WAIT_SECONDS=5 /home/agent-admin/agent-app/bin/show-requirement-evidence.sh
+sudo CRON_WAIT_SECONDS=5 show-requirement-evidence.sh
 ```
 
 개별 확인 명령:
@@ -131,7 +132,7 @@ ss -tulnp | grep -E ':20022\b|:15034\b'
 계정별 권한만 따로 검증하려면 다음 명령을 실행합니다.
 
 ```bash
-sudo /home/agent-admin/agent-app/bin/check-permissions.sh
+sudo check-permissions.sh
 ```
 
 기대 결과:
@@ -151,6 +152,7 @@ agent-test: upload 접근 OK, key/log/monitor 접근 DENIED
 | 업로드 디렉토리 | `/home/agent-admin/agent-app/upload_files` |
 | API 키 | `/home/agent-admin/agent-app/api_keys/t_secret.key` |
 | 모니터링 스크립트 | `/home/agent-admin/agent-app/bin/monitor.sh` |
+| 짧은 실행 링크 | `/usr/local/bin/monitor.sh`, `/usr/local/bin/check-permissions.sh`, `/usr/local/bin/show-requirement-evidence.sh` |
 | 로그 디렉토리 | `/var/log/agent-app` |
 | 환경 변수 파일 | `/etc/agent-app/agent-app.env` |
 | systemd 서비스 | `/etc/systemd/system/agent-app.service` |

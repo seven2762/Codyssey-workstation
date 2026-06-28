@@ -111,6 +111,15 @@ configure_files() {
     setfacl -d -m g:agent-core:rwx "${AGENT_LOG_DIR}"
 }
 
+configure_command_links() {
+    log "실행 명령 심볼릭 링크 구성 중..."
+    install -d -o root -g root -m 755 /usr/local/bin
+
+    ln -sfn "${AGENT_HOME}/bin/monitor.sh" /usr/local/bin/monitor.sh
+    ln -sfn "${AGENT_HOME}/bin/check-permissions.sh" /usr/local/bin/check-permissions.sh
+    ln -sfn "${AGENT_HOME}/bin/show-requirement-evidence.sh" /usr/local/bin/show-requirement-evidence.sh
+}
+
 set_or_append_sshd_config() {
     local key="$1"
     local value="$2"
@@ -209,6 +218,8 @@ AGENT_LOG_DIR    = ${AGENT_LOG_DIR}
 
 검증:
   sudo ./verify-orbstack.sh
+  sudo show-requirement-evidence.sh
+  sudo check-permissions.sh
   systemctl status agent-app --no-pager
   ufw status verbose
 EOF
@@ -220,6 +231,7 @@ main() {
     install_packages
     configure_accounts
     configure_files
+    configure_command_links
     configure_ssh
     configure_firewall
     configure_environment
