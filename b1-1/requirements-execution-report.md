@@ -1,55 +1,80 @@
 # Agent App 요구사항 수행 내역서
 
-작성일: 2026-06-16
-문서 보강일: 2026-06-17
-검증 환경: Docker/Colima, Ubuntu 24.04 컨테이너, linux/amd64
-검증 이미지: `b1-agent-app:proof`
-최종 검증 컨테이너: `b1-agent-proof-20260616-1920`
-컨테이너 기준 시각: UTC
+작성일: 2026-06-28
+검증 환경: OrbStack Ubuntu 24.04 Linux machine, amd64
 
 ## 1. 수행 요약
 
-Agent App 실행 환경을 Docker 이미지로 구성하고 다음 항목을 설정했다.
+초기에는 Docker 컨테이너 기반 구성을 검토했으나, 컨테이너 내부에서 UFW/iptables를 적용하려면 `NET_ADMIN`, `NET_RAW` capability가 필요했다. 이는 앱 컨테이너에 네트워크 관리 권한을 추가로 부여하는 방식이므로, 실제 서버 운영 환경의 보안 설정을 직접 구성한다는 미션 목적과 맞지 않는다고 판단했다.
 
-- SSH 포트를 `20022`로 변경하고 root 원격 접속을 차단했다.
-- UFW를 활성화하고 inbound 허용 포트를 `20022/tcp`, `15034/tcp`로 제한했다.
-- 계정 `agent-admin`, `agent-dev`, `agent-test`를 생성했다.
-- 그룹 `agent-common`, `agent-core`를 생성하고 계정별 그룹 멤버십을 부여했다.
-- 앱 디렉토리, 업로드 디렉토리, API 키 디렉토리, 모니터링 스크립트 디렉토리, 로그 디렉토리를 생성했다.
-- 디렉토리 권한과 ACL을 설정했다.
-- 앱 실행에 필요한 환경 변수를 설정했다.
-- 키 파일 `$AGENT_HOME/api_keys/t_secret.key`를 생성하고 `agent_api_key_test` 1줄을 기록했다.
-- 앱을 root가 아닌 일반 계정 `agent-admin`으로 실행했다.
-- `monitor.sh`를 배치하고 `agent-admin` crontab에 매분 실행되도록 등록했다.
-- 앱 Boot Sequence 5단계 `[OK]`와 `Agent READY`를 확인했다.
-- 앱이 `0.0.0.0:15034`로 LISTEN 상태임을 확인했다.
+따라서 Ubuntu 24.04 기반 OrbStack Linux machine에서 다음 항목을 OS 레벨로 구성했다.
 
-## 2. 설정/명령어 기록
+- SSH 포트를 `20022`로 변경하고 root 원격 접속을 차단한다.
+- UFW를 활성화하고 inbound 허용 포트를 `20022/tcp`, `15034/tcp`로 제한한다.
+- 계정 `agent-admin`, `agent-dev`, `agent-test`를 생성한다.
+- 그룹 `agent-common`, `agent-core`를 생성하고 계정별 그룹 멤버십을 부여한다.
+- 앱 디렉토리, 업로드 디렉토리, API 키 디렉토리, 모니터링 스크립트 디렉토리, 로그 디렉토리를 생성한다.
+- 디렉토리 권한과 ACL을 설정한다.
+- 앱 실행에 필요한 환경 변수를 `/etc/agent-app/agent-app.env`에 설정한다.
+- 키 파일 `$AGENT_HOME/api_keys/t_secret.key`를 생성하고 `agent_api_key_test` 1줄을 기록한다.
+- 앱을 root가 아닌 일반 계정 `agent-admin`으로 실행한다.
+- `systemd` 서비스로 앱을 관리한다.
+- `monitor.sh`를 배치하고 `agent-admin` crontab에 매분 실행되도록 등록한다.
+- `check-permissions.sh`로 `agent-admin`, `agent-dev`, `agent-test`의 권한 분리를 검증한다.
+- `show-requirement-evidence.sh`로 필수 평가 항목별 검증 명령과 출력을 수집한다.
+
+## 2. 실행 절차
+
+OrbStack machine 생성:
+
+```bash
+orb create --arch amd64 ubuntu:noble b1-agent
+orb -m b1-agent
+```
+
+bootstrap 스크립트 실행:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y curl
+curl -fsSL https://raw.githubusercontent.com/seven2762/Codyssey-workstation/b1-1/bootstrap-orbstack.sh -o bootstrap-orbstack.sh
+chmod +x bootstrap-orbstack.sh
+./bootstrap-orbstack.sh
+```
+
+bootstrap 스크립트는 `https://github.com/seven2762/Codyssey-workstation.git` 저장소의 `b1-1` 브랜치를 `${HOME}/Codyssey-workstation`에 clone/update한 뒤 `b1-1/provision-orbstack.sh`를 실행한다.
+
+주의: 프로비저닝 스크립트는 미션 전용 machine을 전제로 `ufw --force reset`을 실행한다. 기존 서비스가 함께 동작하는 공용 서버나 운영 VM에서는 사용하지 않는다.
+
+검증:
+
+```bash
+sudo ./verify-orbstack.sh
+```
+
+## 3. 설정/명령어 기록
 
 ### SSH
 
-Dockerfile에서 OpenSSH 서버를 설치하고 `/etc/ssh/sshd_config`를 다음과 같이 설정했다.
+`provision-orbstack.sh`에서 OpenSSH 서버를 설치하고 `/etc/ssh/sshd_config`를 다음 값으로 설정한다.
 
-```bash
-mkdir -p /var/run/sshd
-sed -i 's/#Port 22/Port 20022/' /etc/ssh/sshd_config
-sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin no/' /etc/ssh/sshd_config
-echo "PermitRootLogin no" >> /etc/ssh/sshd_config
+```text
+Port 20022
+PermitRootLogin no
 ```
 
-컨테이너 시작 시 SSH 데몬을 실행했다.
+서비스 적용:
 
 ```bash
-service ssh start
+systemctl enable ssh
+systemctl restart ssh
 ```
 
 ### 방화벽
 
-컨테이너 시작 시 UFW를 초기화하고 inbound 기본 정책을 deny로 설정한 뒤 필요한 포트만 허용했다.
+VM OS의 UFW를 초기화하고 inbound 기본 정책을 deny로 설정한 뒤 필요한 포트만 허용한다.
 
 ```bash
-update-alternatives --set iptables /usr/sbin/iptables-legacy
-update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
 ufw --force reset
 ufw default deny incoming
 ufw default allow outgoing
@@ -59,8 +84,6 @@ ufw --force enable
 ```
 
 ### 계정/그룹
-
-Dockerfile에서 다음 계정과 그룹을 생성했다.
 
 ```bash
 groupadd agent-common
@@ -82,33 +105,27 @@ usermod -aG agent-core agent-dev
 
 ### 디렉토리/권한/ACL
 
-생성 디렉토리:
+주요 경로:
 
-```bash
-mkdir -p /home/agent-admin/agent-app/upload_files \
-         /home/agent-admin/agent-app/api_keys \
-         /home/agent-admin/agent-app/bin \
-         /var/log/agent-app
+```text
+/home/agent-admin/agent-app
+/home/agent-admin/agent-app/upload_files
+/home/agent-admin/agent-app/api_keys
+/home/agent-admin/agent-app/bin
+/var/log/agent-app
 ```
 
-권한 설정:
+권한 정책:
 
-```bash
-chown -R agent-admin:agent-admin /home/agent-admin/agent-app
-chown agent-admin:agent-common /home/agent-admin/agent-app/upload_files
-chmod 770 /home/agent-admin/agent-app/upload_files
-chown -R agent-admin:agent-core /home/agent-admin/agent-app/api_keys
-chmod 770 /home/agent-admin/agent-app/api_keys
-chmod o-rwx /home/agent-admin/agent-app/api_keys
-chmod 640 /home/agent-admin/agent-app/api_keys/t_secret.key
-chown agent-admin:agent-core /var/log/agent-app
-chmod 770 /var/log/agent-app
-chmod o-rwx /var/log/agent-app
-chown agent-dev:agent-core /home/agent-admin/agent-app/bin/monitor.sh
-chmod 750 /home/agent-admin/agent-app/bin/monitor.sh
-```
+- `upload_files`: `agent-admin:agent-common`, `770`
+- `api_keys`: `agent-admin:agent-core`, `770`
+- `t_secret.key`: `agent-admin:agent-core`, `640`
+- `/var/log/agent-app`: `agent-admin:agent-core`, `770`
+- `monitor.sh`: `agent-dev:agent-core`, `750`
+- `check-permissions.sh`: `agent-dev:agent-core`, `750`
+- `show-requirement-evidence.sh`: `agent-dev:agent-core`, `750`
 
-ACL 설정:
+ACL:
 
 ```bash
 setfacl -m g:agent-common:rwx /home/agent-admin/agent-app/upload_files
@@ -121,130 +138,70 @@ setfacl -d -m g:agent-core:rwx /var/log/agent-app
 
 ### 환경 변수
 
-Dockerfile 및 entrypoint에서 다음 환경 변수를 설정했다.
+`/etc/agent-app/agent-app.env`:
 
 ```bash
 AGENT_HOME=/home/agent-admin/agent-app
 AGENT_PORT=15034
 AGENT_UPLOAD_DIR=/home/agent-admin/agent-app/upload_files
-AGENT_LOG_DIR=/var/log/agent-app
 AGENT_KEY_PATH=/home/agent-admin/agent-app/api_keys/t_secret.key
+AGENT_LOG_DIR=/var/log/agent-app
 ```
-
-### 키 파일
-
-앱에서 요구하는 API 키 파일을 다음 경로와 내용으로 생성했다.
-
-```bash
-echo 'agent_api_key_test' > /home/agent-admin/agent-app/api_keys/t_secret.key
-```
-
-- 경로: `$AGENT_HOME/api_keys/t_secret.key`
-- 내용: `agent_api_key_test` 1줄
-- 권한: `640`
-- 소유/그룹: `agent-admin:agent-core`
 
 ### 앱 실행
 
-앱은 root가 아닌 `agent-admin` 계정으로 실행했다.
+앱은 `systemd` 서비스로 관리하며 `agent-admin` 계정으로 실행한다.
 
-```bash
-su -s /bin/bash agent-admin -c '
-  export AGENT_HOME=/home/agent-admin/agent-app
-  export AGENT_PORT=15034
-  export AGENT_UPLOAD_DIR=/home/agent-admin/agent-app/upload_files
-  export AGENT_KEY_PATH=/home/agent-admin/agent-app/api_keys/t_secret.key
-  export AGENT_LOG_DIR=/var/log/agent-app
-  cd ${AGENT_HOME}
-  ./agent-app
-'
+```ini
+[Service]
+User=agent-admin
+Group=agent-admin
+EnvironmentFile=/etc/agent-app/agent-app.env
+WorkingDirectory=/home/agent-admin/agent-app
+ExecStart=/home/agent-admin/agent-app/agent-app
+Restart=on-failure
 ```
 
-성공 기준:
+관리 명령:
 
-- Boot Sequence 5단계가 모두 `[OK]`
-- 마지막에 `Agent READY` 출력
-- 앱이 `0.0.0.0:15034`로 LISTEN
-- 수동 종료 시 `Ctrl+C` 사용
+```bash
+systemctl status agent-app --no-pager
+systemctl restart agent-app
+journalctl -u agent-app -f
+```
 
 ### cron
 
-`agent-admin` 사용자 crontab에 `monitor.sh` 매분 실행을 등록했다.
+`agent-admin` 사용자 crontab에 `monitor.sh` 매분 실행을 등록한다.
 
 ```bash
-echo '* * * * * /bin/bash /home/agent-admin/agent-app/bin/monitor.sh >> /var/log/agent-app/cron.log 2>&1' | crontab -u agent-admin -
+* * * * * /bin/bash /home/agent-admin/agent-app/bin/monitor.sh >> /var/log/agent-app/cron.log 2>&1
 ```
 
-### monitor.sh
-
-`monitor.sh`는 `$AGENT_HOME/bin/monitor.sh`에 배치했다.
-
-- 소유자: `agent-dev`
-- 그룹: `agent-core`
-- 권한: `750` (`rwxr-x---`)
-- cron 실행 계정: `agent-admin`
-- `agent-admin`은 `agent-core` 그룹에 포함되어 실행 가능
-
-Health Check:
-
-- 프로세스: 제공 앱 바이너리명 `agent-app` 실행 상태 확인
-- 포트: TCP `15034` LISTEN 상태 확인
-- 프로세스 또는 포트 확인 실패 시 `[ERROR]`를 기록하고 `exit 1`
-
-상태 점검:
-
-- UFW/firewalld 활성화 상태 점검
-- 비활성 상태면 `[WARNING]` 출력
-- 방화벽 경고는 스크립트 종료 조건이 아님
-
-자원 수집:
-
-- CPU 사용률 `%`
-- 메모리 사용률 `%`
-- Root partition 디스크 사용률 `%`
-
-임계값 경고:
-
-- `CPU > 20%`: `[WARNING]`
-- `MEM > 10%`: `[WARNING]`
-- `DISK_USED > 80%`: `[WARNING]`
-
-로그:
-
-- 로그 파일: `/var/log/agent-app/monitor.log`
-- 로그 포맷: `[YYYY-MM-DD HH:MM:SS] PID:... CPU:..% MEM:..% DISK_USED:..%`
-- 로그 용량 관리: 스크립트 자체 로직으로 `monitor.log` 최대 10MB, 로테이션 파일 최대 10개 유지
-
-## 3. 빌드/실행/검증 명령 기록
-
-이미지 빌드:
+## 4. 검증 명령
 
 ```bash
-docker build --platform linux/amd64 -t b1-agent-app:proof .
+grep -E "^(Port|PermitRootLogin)" /etc/ssh/sshd_config
+ss -tulnp | grep -E ":20022\b|:15034\b"
+ufw status verbose
+id agent-admin
+id agent-dev
+id agent-test
+getent group agent-common
+getent group agent-core
+ls -ld /home/agent-admin/agent-app /home/agent-admin/agent-app/upload_files /home/agent-admin/agent-app/api_keys /home/agent-admin/agent-app/bin /var/log/agent-app
+getfacl -p /home/agent-admin/agent-app/upload_files /home/agent-admin/agent-app/api_keys /var/log/agent-app
+systemctl status agent-app --no-pager
+crontab -u agent-admin -l
+tail -n 10 /var/log/agent-app/monitor.log
+sudo /home/agent-admin/agent-app/bin/check-permissions.sh
+sudo /home/agent-admin/agent-app/bin/show-requirement-evidence.sh
 ```
 
-검증 컨테이너 실행:
+## 5. Docker capability와 VM의 차이
 
-```bash
-docker run --platform linux/amd64 --cap-add NET_ADMIN --cap-add NET_RAW -d --name b1-agent-proof-20260616-1920 b1-agent-app:proof
-```
+Docker 컨테이너는 호스트 커널을 공유하면서 프로세스, 파일시스템, 네트워크 namespace를 격리한다. 기본 상태의 컨테이너는 호스트 네트워크 스택을 관리할 권한이 없기 때문에 UFW/iptables 조작이 제한된다.
 
-주요 검증 명령:
+`NET_ADMIN`을 추가하면 컨테이너 안의 프로세스가 네트워크 인터페이스, 라우팅, 방화벽 규칙 같은 네트워크 관리 기능을 사용할 수 있다. `NET_RAW`를 추가하면 raw socket 사용이 가능해진다. 이는 앱 실행 단위인 컨테이너에 운영체제 네트워크 관리 권한을 일부 넘기는 것이므로 컨테이너 격리 원칙을 약화시킨다.
 
-```bash
-docker logs --since 2026-06-16T10:43:52Z --until 2026-06-16T10:44:45Z b1-agent-proof-20260616-1920
-docker exec b1-agent-proof-20260616-1920 bash -lc 'grep -E "^(Port|PermitRootLogin)" /etc/ssh/sshd_config; ss -tulnp | grep -E ":20022\b|:15034\b"; ufw status verbose'
-docker exec b1-agent-proof-20260616-1920 bash -lc 'id agent-admin; id agent-dev; id agent-test; getent group agent-common; getent group agent-core'
-docker exec b1-agent-proof-20260616-1920 bash -lc 'ls -ld /home/agent-admin/agent-app /home/agent-admin/agent-app/upload_files /home/agent-admin/agent-app/api_keys /home/agent-admin/agent-app/bin /var/log/agent-app; getfacl -p /home/agent-admin/agent-app/upload_files /home/agent-admin/agent-app/api_keys /var/log/agent-app'
-docker exec b1-agent-proof-20260616-1920 bash -lc '/bin/bash /home/agent-admin/agent-app/bin/monitor.sh; tail -n 10 /var/log/agent-app/monitor.log'
-docker exec b1-agent-proof-20260616-1920 bash -lc 'crontab -u agent-admin -l; wc -l /var/log/agent-app/monitor.log /var/log/agent-app/cron.log'
-```
-
-## 4. 변경 보완 사항
-
-검증 중 `monitor.sh`가 `agent-admin` 권한으로 실행될 때 `ufw status` 권한 부족으로 실제 active 상태를 비활성으로 오판하는 문제가 확인되어 보완했다.
-
-- root 실행 시: `ufw status` 결과의 `Status: active` 확인
-- 비root 실행 시: `/etc/ufw/ufw.conf`의 `ENABLED=yes`를 fallback으로 확인
-
-또한 API 키 파일 권한 증거가 디렉토리 그룹 정책과 일치하도록 `api_keys` 하위 파일까지 `agent-core` 그룹 소유가 되도록 보완했다.
+반면 VM은 운영체제 자체를 실행하는 서버 단위다. VM 안의 UFW, SSH, cron, 사용자/그룹, ACL은 그 VM의 OS를 관리하는 정상적인 운영 작업이다. 따라서 이 미션처럼 서버 운영 환경 구축을 학습할 때는 VM에서 직접 구성하는 방식이 더 목적에 맞다.
