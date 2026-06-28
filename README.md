@@ -25,6 +25,7 @@ VM에서는 UFW, SSH, cron, 사용자/그룹, ACL이 실제 OS의 운영 관리 
 | `b1-1/check-permissions.sh` | `agent-admin`, `agent-dev`, `agent-test` 계정별 권한 검증 스크립트 |
 | `b1-1/show-requirement-evidence.sh` | 필수 평가 항목별 검증 명령과 출력을 모아 보여주는 증거 수집 스크립트 |
 | `bootstrap-orbstack.sh` | 저장소 clone/update 후 `b1-1/provision-orbstack.sh`를 실행하는 bootstrap 스크립트 |
+| `orbstack-machine.sh` | macOS 호스트에서 OrbStack machine 생성/시작/접속을 처리하는 스크립트 |
 | `b1-1/monitor.sh` | 프로세스/포트/방화벽/CPU/MEM/DISK 점검 및 로그 기록 |
 | `b1-1/agent-app` | 제공된 x86_64 Linux 실행 바이너리 |
 | `b1-1/requirements-execution-report.md` | 수행 내역서 |
@@ -33,6 +34,20 @@ VM에서는 UFW, SSH, cron, 사용자/그룹, ACL이 실제 OS의 운영 관리 
 ## OrbStack Machine 생성
 
 `agent-app`은 x86_64 Linux 바이너리이므로 Apple Silicon 환경에서도 amd64 machine으로 생성합니다.
+
+macOS 호스트에서 스크립트로 생성/시작/접속까지 한 번에 처리할 수 있습니다.
+
+```bash
+./orbstack-machine.sh
+```
+
+개별 명령이 필요하면 다음처럼 실행합니다.
+
+```bash
+./orbstack-machine.sh create
+./orbstack-machine.sh start
+./orbstack-machine.sh shell
+```
 
 ```bash
 orb create --arch amd64 ubuntu:noble b1-agent
