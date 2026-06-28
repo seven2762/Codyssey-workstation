@@ -84,6 +84,8 @@ configure_accounts() {
 
 configure_files() {
     log "디렉토리/권한/ACL 구성 중..."
+    chmod 711 /home/agent-admin
+
     install -d -o agent-admin -g agent-admin -m 755 "${AGENT_HOME}"
     install -d -o agent-admin -g agent-common -m 770 "${AGENT_UPLOAD_DIR}"
     install -d -o agent-admin -g agent-core -m 770 "${AGENT_HOME}/api_keys"
@@ -92,6 +94,7 @@ configure_files() {
 
     install -o agent-admin -g agent-admin -m 755 "${SCRIPT_DIR}/agent-app" "${AGENT_HOME}/agent-app"
     install -o agent-dev -g agent-core -m 750 "${SCRIPT_DIR}/monitor.sh" "${AGENT_HOME}/bin/monitor.sh"
+    install -o agent-dev -g agent-core -m 750 "${SCRIPT_DIR}/check-permissions.sh" "${AGENT_HOME}/bin/check-permissions.sh"
 
     printf 'agent_api_key_test\n' > "${AGENT_KEY_PATH}"
     chown agent-admin:agent-core "${AGENT_KEY_PATH}"

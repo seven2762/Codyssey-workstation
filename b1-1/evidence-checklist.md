@@ -23,6 +23,7 @@
 | `Agent READY` | 준비 | `journalctl -u agent-app`에서 `Agent READY` 확인 |
 | 앱 포트 LISTEN | 준비 | `0.0.0.0:15034` LISTEN 확인 |
 | monitor.sh 파일 정책 | 준비 | 경로 `$AGENT_HOME/bin/monitor.sh`, 소유자 `agent-dev`, 그룹 `agent-core`, 권한 `750` 확인 |
+| 계정별 권한 검증 | 준비 | `check-permissions.sh`에서 admin/dev/test 기대 접근 결과 확인 |
 | monitor.sh Health Check | 준비 | 프로세스/포트 비정상 시 `[ERROR]` 후 `exit 1` 로직 확인 |
 | monitor.sh 방화벽 경고 | 준비 | UFW/firewalld 비활성 시 `[WARNING]`, 종료하지 않음 |
 | monitor.sh 자원/임계값 | 준비 | CPU/MEM/DISK_USED 수집 및 CPU>20, MEM>10, DISK_USED>80 경고 로직 확인 |
@@ -125,7 +126,21 @@ sudo -u agent-admin /bin/bash /home/agent-admin/agent-app/bin/monitor.sh
 sudo tail -n 10 /var/log/agent-app/monitor.log
 ```
 
-### 10. cron 매분 실행 및 로그 증가 증거
+### 10. 계정별 권한 검증
+
+```bash
+sudo /home/agent-admin/agent-app/bin/check-permissions.sh
+```
+
+기대 결과:
+
+```text
+agent-admin: upload/key/log/monitor 접근 OK
+agent-dev: upload/key/log/monitor 접근 OK
+agent-test: upload 접근 OK, key/log/monitor 접근 DENIED
+```
+
+### 11. cron 매분 실행 및 로그 증가 증거
 
 ```bash
 sudo crontab -u agent-admin -l

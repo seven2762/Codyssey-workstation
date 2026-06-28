@@ -22,6 +22,7 @@ VM에서는 UFW, SSH, cron, 사용자/그룹, ACL이 실제 OS의 운영 관리 
 | --- | --- |
 | `b1-1/provision-orbstack.sh` | OrbStack Ubuntu machine 안에서 서버 환경을 구성하는 프로비저닝 스크립트 |
 | `b1-1/verify-orbstack.sh` | SSH/UFW/계정/권한/ACL/service/cron/monitor 로그 검증 스크립트 |
+| `b1-1/check-permissions.sh` | `agent-admin`, `agent-dev`, `agent-test` 계정별 권한 검증 스크립트 |
 | `bootstrap-orbstack.sh` | 저장소 clone/update 후 `b1-1/provision-orbstack.sh`를 실행하는 bootstrap 스크립트 |
 | `b1-1/monitor.sh` | 프로세스/포트/방화벽/CPU/MEM/DISK 점검 및 로그 기록 |
 | `b1-1/agent-app` | 제공된 x86_64 Linux 실행 바이너리 |
@@ -84,6 +85,20 @@ sudo ufw status verbose
 sudo crontab -u agent-admin -l
 sudo tail -n 20 /var/log/agent-app/monitor.log
 ss -tulnp | grep -E ':20022\b|:15034\b'
+```
+
+계정별 권한만 따로 검증하려면 다음 명령을 실행합니다.
+
+```bash
+sudo /home/agent-admin/agent-app/bin/check-permissions.sh
+```
+
+기대 결과:
+
+```text
+agent-admin: upload/key/log/monitor 접근 OK
+agent-dev: upload/key/log/monitor 접근 OK
+agent-test: upload 접근 OK, key/log/monitor 접근 DENIED
 ```
 
 ## 주요 경로

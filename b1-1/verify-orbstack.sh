@@ -46,7 +46,8 @@ ${SUDO} ls -ld \
     "${AGENT_LOG_DIR}"
 ${SUDO} ls -l \
     "${AGENT_HOME}/api_keys/t_secret.key" \
-    "${AGENT_HOME}/bin/monitor.sh"
+    "${AGENT_HOME}/bin/monitor.sh" \
+    "${AGENT_HOME}/bin/check-permissions.sh"
 
 section "ACL"
 ${SUDO} getfacl -p \
@@ -64,3 +65,6 @@ ${SUDO} crontab -u agent-admin -l
 section "monitor.sh 수동 실행"
 run_as_agent_admin /bin/bash "${AGENT_HOME}/bin/monitor.sh"
 ${SUDO} tail -n 10 "${AGENT_LOG_DIR}/monitor.log"
+
+section "계정별 권한 검증"
+${SUDO} /bin/bash "${AGENT_HOME}/bin/check-permissions.sh"
