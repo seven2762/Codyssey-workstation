@@ -8,19 +8,23 @@ MACHINE_NAME="${MACHINE_NAME:-b1-agent}"
 DISTRO="${DISTRO:-ubuntu:noble}"
 ARCH="${ARCH:-amd64}"
 ACTION="${1:-up}"
+BOOTSTRAP_URL="${BOOTSTRAP_URL:-https://raw.githubusercontent.com/seven2762/Codyssey-workstation/b1-1/b1-1/bootstrap-orbstack.sh}"
 
 usage() {
     cat <<EOF
-Usage: ${0} [up|create|start|shell|stop|delete|list]
+Usage: ${0} [up|create|start|shell|bootstrap|reset-demo|stop|delete|list]
 
 Environment overrides:
   MACHINE_NAME=${MACHINE_NAME}
   DISTRO=${DISTRO}
   ARCH=${ARCH}
+  BOOTSTRAP_URL=${BOOTSTRAP_URL}
 
 Examples:
   ${0}
   ${0} up
+  ${0} bootstrap
+  ${0} reset-demo
   ${0} shell
   MACHINE_NAME=b1-agent ${0} start
 EOF
@@ -53,6 +57,30 @@ start_machine() {
     orb start "${MACHINE_NAME}"
 }
 
+delete_machine() {
+    if ! machine_exists; then
+        echo "[INFO] OrbStack machine does not exist: ${MACHINE_NAME}"
+        return
+    fi
+
+    echo "[INFO] Deleting OrbStack machine: ${MACHINE_NAME}"
+    orb stop "${MACHINE_NAME}" >/dev/null 2>&1 || true
+    orb delete "${MACHINE_NAME}"
+}
+
+run_bootstrap() {
+    start_machine
+    echo "[INFO] Running bootstrap inside ${MACHINE_NAME}"
+    orb -m "${MACHINE_NAME}" -- bash -lc "sudo apt-get update && sudo apt-get install -y curl && curl -fsSL '${BOOTSTRAP_URL}' -o /tmp/bootstrap-orbstack.sh && chmod +x /tmp/bootstrap-orbstack.sh && /tmp/bootstrap-orbstack.sh"
+}
+
+reset_demo() {
+    delete_machine
+    create_machine
+    run_bootstrap
+    open_shell
+}
+
 open_shell() {
     echo "[INFO] Opening shell: ${MACHINE_NAME}"
     exec orb -m "${MACHINE_NAME}"
@@ -72,6 +100,12 @@ main() {
         start)
             start_machine
             ;;
+        bootstrap)
+            run_bootstrap
+            ;;
+        reset-demo|demo)
+            reset_demo
+            ;;
         shell|connect)
             create_machine
             open_shell
@@ -80,7 +114,7 @@ main() {
             orb stop "${MACHINE_NAME}"
             ;;
         delete)
-            orb delete "${MACHINE_NAME}"
+            delete_machine
             ;;
         list)
             orb list
