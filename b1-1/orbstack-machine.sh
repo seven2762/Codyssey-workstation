@@ -65,13 +65,17 @@ delete_machine() {
 
     echo "[INFO] Deleting OrbStack machine: ${MACHINE_NAME}"
     orb stop "${MACHINE_NAME}" >/dev/null 2>&1 || true
-    orb delete "${MACHINE_NAME}"
+    if orb delete --help 2>&1 | grep -Eq -- '(^|[[:space:]])(-f|--force)([[:space:],]|$)'; then
+        orb delete --force "${MACHINE_NAME}" 2>/dev/null || orb delete -f "${MACHINE_NAME}"
+    else
+        printf 'y\n' | orb delete "${MACHINE_NAME}"
+    fi
 }
 
 run_bootstrap() {
     start_machine
     echo "[INFO] Running bootstrap inside ${MACHINE_NAME}"
-    orb -m "${MACHINE_NAME}" -- bash -lc "sudo apt-get update && sudo apt-get install -y curl && curl -fsSL '${BOOTSTRAP_URL}' -o /tmp/bootstrap-orbstack.sh && chmod +x /tmp/bootstrap-orbstack.sh && /tmp/bootstrap-orbstack.sh"
+    orb -m "${MACHINE_NAME}" env BOOTSTRAP_URL="${BOOTSTRAP_URL}" bash -lc 'sudo apt-get update && sudo apt-get install -y curl && curl -fsSL "$BOOTSTRAP_URL" -o /tmp/bootstrap-orbstack.sh && chmod +x /tmp/bootstrap-orbstack.sh && /tmp/bootstrap-orbstack.sh'
 }
 
 reset_demo() {
@@ -107,7 +111,7 @@ main() {
             reset_demo
             ;;
         shell|connect)
-            create_machine
+            start_machine
             open_shell
             ;;
         stop)
