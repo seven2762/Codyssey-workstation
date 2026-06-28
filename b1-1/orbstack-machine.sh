@@ -11,7 +11,7 @@ ACTION="${1:-up}"
 
 usage() {
     cat <<EOF
-Usage: ./orbstack-machine.sh [up|create|start|shell|stop|delete|list]
+Usage: ${0} [up|create|start|shell|stop|delete|list]
 
 Environment overrides:
   MACHINE_NAME=${MACHINE_NAME}
@@ -19,10 +19,10 @@ Environment overrides:
   ARCH=${ARCH}
 
 Examples:
-  ./orbstack-machine.sh
-  ./orbstack-machine.sh up
-  ./orbstack-machine.sh shell
-  MACHINE_NAME=b1-agent ./orbstack-machine.sh start
+  ${0}
+  ${0} up
+  ${0} shell
+  MACHINE_NAME=b1-agent ${0} start
 EOF
 }
 

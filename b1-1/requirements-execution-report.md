@@ -37,7 +37,7 @@ bootstrap 스크립트 실행:
 ```bash
 sudo apt-get update
 sudo apt-get install -y curl
-curl -fsSL https://raw.githubusercontent.com/seven2762/Codyssey-workstation/b1-1/bootstrap-orbstack.sh -o bootstrap-orbstack.sh
+curl -fsSL https://raw.githubusercontent.com/seven2762/Codyssey-workstation/b1-1/b1-1/bootstrap-orbstack.sh -o bootstrap-orbstack.sh
 chmod +x bootstrap-orbstack.sh
 ./bootstrap-orbstack.sh
 ```
