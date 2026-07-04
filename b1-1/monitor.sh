@@ -9,13 +9,18 @@
 # systemd agent-app 서비스가 EnvironmentFile로 쓰는 파일을 monitor도 그대로
 # 읽어, 앱과 모니터가 항상 같은 AGENT_PORT/경로 설정을 보게 한다.
 # cron/대화형 셸은 이 파일을 자동 로드하지 않으므로 여기서 명시적으로 읽는다.
-# 파일은 root:agent-core 640 으로 root만 수정 가능 → source 해도 안전하다.
-# 아래 ${VAR:-기본값} 은 .env 가 없을 때를 위한 최종 폴백이다.
+# 파일은 root:agent-core 640 으로 root만 수정 가능 → 읽어도 안전하다.
+#
+# 우선순위: 명시적 env(호출자/테스트 override) > .env > 아래 ${VAR:-기본값}.
+# .env 는 "기본값" 공급원이므로, 이미 환경에 지정된 키는 건드리지 않고 없는
+# 키만 채운다. (예전 `set -a; . .env` 는 무조건 대입이라 호출자 override 를
+# 덮어써, AGENT_PORT/AGENT_LOG_DIR 를 바꿔 테스트하는 게 불가능했다.)
 AGENT_ENV_FILE="${AGENT_ENV_FILE:-/etc/agent-app/agent-app.env}"
 if [ -r "${AGENT_ENV_FILE}" ]; then
-    set -a
-    . "${AGENT_ENV_FILE}"
-    set +a
+    while IFS='=' read -r env_key env_val; do
+        case "${env_key}" in ''|'#'*) continue ;; esac
+        [ -z "${!env_key+set}" ] && export "${env_key}=${env_val}"
+    done < "${AGENT_ENV_FILE}"
 fi
 
 # ── 환경 변수 기본값 설정 (.env 미로드 시 폴백) ────────────────────────────
