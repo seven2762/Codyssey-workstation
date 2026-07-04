@@ -24,8 +24,7 @@ VM에서는 UFW, SSH, cron, 사용자/그룹, ACL이 실제 OS의 운영 관리 
 | `b1-1/verify-orbstack.sh` | SSH/UFW/계정/권한/ACL/service/cron/monitor 로그 검증 스크립트 |
 | `b1-1/check-permissions.sh` | `agent-admin`, `agent-dev`, `agent-test` 계정별 권한 검증 스크립트 |
 | `b1-1/show-requirement-evidence.sh` | 필수 평가 항목별 검증 명령과 출력을 모아 보여주는 증거 수집 스크립트 |
-| `b1-1/bootstrap-orbstack.sh` | 저장소 clone/update 후 `b1-1/provision-orbstack.sh`를 실행하는 bootstrap 스크립트 |
-| `b1-1/orbstack-machine.sh` | macOS 호스트에서 OrbStack machine 생성/시작/접속을 처리하는 스크립트 |
+| `b1-1/orbstack-machine.sh` | macOS 호스트에서 OrbStack machine 생성/시작/접속 및 프로비저닝을 처리하는 스크립트 |
 | `b1-1/monitor.sh` | 프로세스/포트/방화벽/CPU/MEM/DISK 점검 및 로그 기록 |
 | `b1-1/agent-app` | 제공된 x86_64 Linux 실행 바이너리 |
 | `b1-1/requirements-execution-report.md` | 수행 내역서 |
@@ -49,43 +48,29 @@ macOS 호스트에서 스크립트로 생성/시작/접속까지 한 번에 처�
 ./b1-1/orbstack-machine.sh shell
 ```
 
-시연용으로 기존 machine을 지우고 새로 만든 뒤 bootstrap/provision까지 한 번에 실행하려면 macOS 호스트에서 다음 명령을 실행합니다.
+시연용으로 기존 machine을 지우고 새로 만든 뒤 프로비저닝까지 한 번에 실행하려면 macOS 호스트에서 다음 명령을 실행합니다.
 
 ```bash
 ./b1-1/orbstack-machine.sh reset-demo
 ```
 
-```bash
-orb create --arch amd64 ubuntu:noble b1-agent
-orb -m b1-agent
-```
+## 설치 (프로비저닝)
 
-## 설치
-
-OrbStack machine 안에서 bootstrap 스크립트를 내려받아 실행합니다. 스크립트가 저장소를 clone/update하고 프로비저닝까지 이어서 실행합니다.
-`bootstrap-orbstack.sh`의 역할은 VM 생성이 아니라, 이미 접속한 Ubuntu machine 안에서 `git`을 준비하고 이 저장소의 `b1-1` 브랜치를 받은 뒤 `b1-1/provision-orbstack.sh`를 실행하는 것입니다.
+OrbStack은 macOS 파일시스템을 machine 안에 동일 경로로 마운트하므로, 저장소를 다시 clone할 필요 없이 로컬 파일에서 바로 프로비저닝합니다. macOS 호스트에서 다음 한 줄이면 machine 생성/시작 후 마운트 경로의 `provision-orbstack.sh`를 실행합니다.
 
 ```bash
-sudo apt-get update
-sudo apt-get install -y curl
-curl -fsSL https://raw.githubusercontent.com/seven2762/Codyssey-workstation/b1-1/b1-1/bootstrap-orbstack.sh -o bootstrap-orbstack.sh
-chmod +x bootstrap-orbstack.sh
-./bootstrap-orbstack.sh
+./b1-1/orbstack-machine.sh provision
 ```
 
-위 설치 절차만 한 줄로 실행하려면 OrbStack machine 안에서 다음 명령을 사용할 수 있습니다.
+이미 접속한 machine 안에서 직접 실행할 수도 있습니다(마운트된 로컬 경로 그대로 사용).
 
 ```bash
-sudo apt-get update && sudo apt-get install -y curl && bash <(curl -fsSL https://raw.githubusercontent.com/seven2762/Codyssey-workstation/b1-1/b1-1/bootstrap-orbstack.sh)
+sudo bash /Users/<you>/.../b1-1/provision-orbstack.sh
 ```
+
+`provision-orbstack.sh`는 필요한 패키지 설치까지 스스로 처리하므로 `git`/`curl`은 필요하지 않습니다. 또한 여러 번 실행해도 안전한(멱등) 스크립트입니다.
 
 주의: `provision-orbstack.sh`는 미션 전용 machine을 전제로 `ufw --force reset`을 실행합니다. 기존 서비스가 같이 떠 있는 공용 서버나 운영 VM에서는 실행하지 마세요.
-
-기본 clone 경로는 `${HOME}/Codyssey-workstation`입니다. 경로를 바꾸려면 다음처럼 실행합니다.
-
-```bash
-TARGET_DIR=/opt/Codyssey-workstation ./bootstrap-orbstack.sh
-```
 
 스크립트가 수행하는 작업:
 
@@ -116,7 +101,7 @@ sudo show-requirement-evidence.sh
 대기 시간을 줄여 빠르게 출력만 확인하려면 다음처럼 실행할 수 있습니다.
 
 ```bash
-sudo CRON_WAIT_SECONDS=5 show-requirement-evidence.sh
+sudo bash -lc 'export CRON_WAIT_SECONDS=5; show-requirement-evidence.sh'
 ```
 
 개별 확인 명령:

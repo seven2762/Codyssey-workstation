@@ -8,22 +8,24 @@ MACHINE_NAME="${MACHINE_NAME:-b1-agent}"
 DISTRO="${DISTRO:-ubuntu:noble}"
 ARCH="${ARCH:-amd64}"
 ACTION="${1:-up}"
-BOOTSTRAP_URL="${BOOTSTRAP_URL:-https://raw.githubusercontent.com/seven2762/Codyssey-workstation/b1-1/b1-1/bootstrap-orbstack.sh}"
+# 이 스크립트가 있는 b1-1 디렉토리(맥 경로). OrbStack이 맥 파일시스템을 VM 안에
+# 동일 경로로 마운트하므로, VM에서도 이 경로의 provision을 바로 실행할 수 있다
+# (git clone/네트워크 불필요, 항상 로컬 최신 코드 사용).
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 usage() {
     cat <<EOF
-Usage: ${0} [up|create|start|shell|bootstrap|reset-demo|stop|delete|list]
+Usage: ${0} [up|create|start|shell|provision|reset-demo|stop|delete|list]
 
 Environment overrides:
   MACHINE_NAME=${MACHINE_NAME}
   DISTRO=${DISTRO}
   ARCH=${ARCH}
-  BOOTSTRAP_URL=${BOOTSTRAP_URL}
 
 Examples:
   ${0}
   ${0} up
-  ${0} bootstrap
+  ${0} provision
   ${0} reset-demo
   ${0} shell
   MACHINE_NAME=b1-agent ${0} start
@@ -72,16 +74,21 @@ delete_machine() {
     fi
 }
 
-run_bootstrap() {
+run_provision() {
     start_machine
-    echo "[INFO] Running bootstrap inside ${MACHINE_NAME}"
-    orb -m "${MACHINE_NAME}" env BOOTSTRAP_URL="${BOOTSTRAP_URL}" bash -lc 'sudo apt-get update && sudo apt-get install -y curl && curl -fsSL "$BOOTSTRAP_URL" -o /tmp/bootstrap-orbstack.sh && chmod +x /tmp/bootstrap-orbstack.sh && /tmp/bootstrap-orbstack.sh'
+    echo "[INFO] Running provision inside ${MACHINE_NAME} from mount: ${SCRIPT_DIR}"
+    local quoted_dir
+    printf -v quoted_dir '%q' "${SCRIPT_DIR}"
+
+    # OrbStack 마운트로 VM에서 동일 경로가 보이므로 provision을 직접 실행한다.
+    # provision-orbstack.sh가 패키지 설치까지 스스로 처리하므로 curl/git 불필요.
+    orb -m "${MACHINE_NAME}" bash -lc "sudo bash ${quoted_dir}/provision-orbstack.sh"
 }
 
 reset_demo() {
     delete_machine
     create_machine
-    run_bootstrap
+    run_provision
     open_shell
 }
 
@@ -104,8 +111,8 @@ main() {
         start)
             start_machine
             ;;
-        bootstrap)
-            run_bootstrap
+        provision|bootstrap)
+            run_provision
             ;;
         reset-demo|demo)
             reset_demo

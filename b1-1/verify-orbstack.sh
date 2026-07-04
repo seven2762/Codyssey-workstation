@@ -25,7 +25,7 @@ run_as_agent_admin() {
 
 section "SSH 설정"
 ${SUDO} grep -E "^(Port|PermitRootLogin)" /etc/ssh/sshd_config
-ss -tulnp | grep -E ":20022\b|:${AGENT_PORT}\b"
+ss -tulnp | grep -E ":20022\b|:${AGENT_PORT}\b" || true
 
 section "방화벽"
 ${SUDO} ufw status verbose

@@ -25,24 +25,21 @@
 
 ## 2. 실행 절차
 
-OrbStack machine 생성:
+OrbStack machine 생성 및 프로비저닝(macOS 호스트에서 한 번에):
 
 ```bash
-orb create --arch amd64 ubuntu:noble b1-agent
-orb -m b1-agent
+./b1-1/orbstack-machine.sh provision
 ```
 
-bootstrap 스크립트 실행:
+`agent-app`이 x86_64 바이너리이므로 machine은 `--arch amd64`로 생성한다. OrbStack이 macOS 파일시스템을 machine 안에 동일 경로로 마운트하므로, 저장소를 별도로 clone하지 않고 로컬 파일에서 바로 프로비저닝한다. 위 명령은 machine 생성/시작 후 마운트 경로의 `b1-1/provision-orbstack.sh`를 실행한다.
+
+이미 접속한 machine 안에서 직접 실행할 수도 있다.
 
 ```bash
-sudo apt-get update
-sudo apt-get install -y curl
-curl -fsSL https://raw.githubusercontent.com/seven2762/Codyssey-workstation/b1-1/b1-1/bootstrap-orbstack.sh -o bootstrap-orbstack.sh
-chmod +x bootstrap-orbstack.sh
-./bootstrap-orbstack.sh
+sudo bash /Users/<사용자>/.../b1-1/provision-orbstack.sh
 ```
 
-bootstrap 스크립트는 `https://github.com/seven2762/Codyssey-workstation.git` 저장소의 `b1-1` 브랜치를 `${HOME}/Codyssey-workstation`에 clone/update한 뒤 `b1-1/provision-orbstack.sh`를 실행한다.
+`provision-orbstack.sh`는 필요한 패키지 설치까지 스스로 처리하므로 `git`/`curl`이 필요 없고, 여러 번 실행해도 안전한(멱등) 스크립트다.
 
 주의: 프로비저닝 스크립트는 미션 전용 machine을 전제로 `ufw --force reset`을 실행한다. 기존 서비스가 함께 동작하는 공용 서버나 운영 VM에서는 사용하지 않는다.
 

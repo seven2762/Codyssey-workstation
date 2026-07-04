@@ -77,6 +77,7 @@ show_boot_sequence() {
     run_shell "journalctl -u agent-app --no-pager -n 300 | grep -E '\\[[1-5]/5\\]|Agent READY' || true"
 }
 
+
 show_monitor_health() {
     section "monitor.sh 프로세스/포트 점검 및 exit 1 확인"
     run_shell "pgrep -af agent-app || true"
@@ -87,8 +88,12 @@ show_monitor_health() {
     ${SUDO} chown agent-admin:agent-core "${tmp_dir}" 2>/dev/null || true
     ${SUDO} chmod 770 "${tmp_dir}" 2>/dev/null || true
 
-    printf '\n$ sudo -u agent-admin env AGENT_PORT=65000 AGENT_LOG_DIR=%s /bin/bash %s\n' "${tmp_dir}" "${MONITOR_PATH}"
-    run_as_agent_admin env AGENT_PORT=65000 AGENT_LOG_DIR="${tmp_dir}" /bin/bash "${MONITOR_PATH}"
+    local quoted_tmp_dir quoted_monitor_path
+    printf -v quoted_tmp_dir '%q' "${tmp_dir}"
+    printf -v quoted_monitor_path '%q' "${MONITOR_PATH}"
+
+    printf '\n$ sudo -u agent-admin bash -lc '\''export AGENT_PORT=65000; export AGENT_LOG_DIR=%s; /bin/bash %s'\''\n' "${quoted_tmp_dir}" "${quoted_monitor_path}"
+    run_as_agent_admin bash -lc "export AGENT_PORT=65000; export AGENT_LOG_DIR=${quoted_tmp_dir}; /bin/bash ${quoted_monitor_path}"
     local exit_code=$?
     printf '$ echo $?\n%s\n' "${exit_code}"
 
@@ -134,8 +139,13 @@ show_log_rotation() {
     printf '\n$ ls -lh %s\n' "${tmp_dir}"
     ls -lh "${tmp_dir}"
 
-    printf '\n$ sudo -u agent-admin env AGENT_LOG_DIR=%s AGENT_PORT=%s /bin/bash %s\n' "${tmp_dir}" "${AGENT_PORT}" "${MONITOR_PATH}"
-    run_as_agent_admin env AGENT_LOG_DIR="${tmp_dir}" AGENT_PORT="${AGENT_PORT}" /bin/bash "${MONITOR_PATH}" || true
+    local quoted_tmp_dir quoted_agent_port quoted_monitor_path
+    printf -v quoted_tmp_dir '%q' "${tmp_dir}"
+    printf -v quoted_agent_port '%q' "${AGENT_PORT}"
+    printf -v quoted_monitor_path '%q' "${MONITOR_PATH}"
+
+    printf '\n$ sudo -u agent-admin bash -lc '\''export AGENT_LOG_DIR=%s; export AGENT_PORT=%s; /bin/bash %s'\''\n' "${quoted_tmp_dir}" "${quoted_agent_port}" "${quoted_monitor_path}"
+    run_as_agent_admin bash -lc "export AGENT_LOG_DIR=${quoted_tmp_dir}; export AGENT_PORT=${quoted_agent_port}; /bin/bash ${quoted_monitor_path}" || true
 
     printf '\n$ ls -lh %s\n' "${tmp_dir}"
     ls -lh "${tmp_dir}"
