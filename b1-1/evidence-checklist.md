@@ -128,6 +128,40 @@ sudo -u agent-admin /bin/bash /home/agent-admin/agent-app/bin/monitor.sh
 sudo tail -n 10 /var/log/agent-app/monitor.log
 ```
 
+### 9-1. monitor.sh Health Check 실패 → `exit 1` 시연
+
+프로세스/포트가 비정상일 때 `[ERROR]` 출력 후 `exit 1` 로 종료하는지 확인한다.
+
+방법 A) 죽은 포트(65000)를 가리켜 포트 Health Check 실패 유발 — 실행 중인 서비스에 영향 없음(권장).
+
+```bash
+sudo -u agent-admin bash -c 'AGENT_PORT=65000 /bin/bash /home/agent-admin/agent-app/bin/monitor.sh'
+echo "exit=$?"
+```
+
+기대 결과:
+
+```text
+[YYYY-MM-DD HH:MM:SS] [ERROR] TCP 65000 포트가 LISTEN 상태가 아닙니다. 모니터링을 종료합니다.
+exit=1
+```
+
+방법 B) 실제 앱을 잠깐 멈춰 프로세스 Health Check 실패 유발 — 진짜 다운 상태 시연(확인 후 반드시 복구).
+
+```bash
+sudo systemctl stop agent-app
+sudo -u agent-admin /bin/bash /home/agent-admin/agent-app/bin/monitor.sh
+echo "exit=$?"
+sudo systemctl restart agent-app
+```
+
+기대 결과:
+
+```text
+[YYYY-MM-DD HH:MM:SS] [ERROR] 프로세스 'agent-app' 가 실행 중이지 않습니다. 모니터링을 종료합니다.
+exit=1
+```
+
 ### 10. 계정별 권한 검증
 
 ```bash
