@@ -74,7 +74,12 @@ show_boot_sequence() {
     section "Boot Sequence 및 Agent READY"
     run_shell "systemctl status agent-app --no-pager --lines=20"
     run_root journalctl -u agent-app --no-pager -n 80
-    run_shell "journalctl -u agent-app --no-pager -n 300 | grep -E '\\[[1-5]/5\\]|Agent READY' || true"
+
+    # Boot Sequence는 서비스가 active 상태로 진입한 시점에 딱 한 번만 찍힌다.
+    # 서비스가 오래 떠 있으면(재시작 없이) 이후 워크로드 로그에 밀려 "-n 300"
+    # 같은 최근 로그 창에는 안 잡힐 수 있다. ActiveEnterTimestamp(마지막으로
+    # active 가 된 정확한 시각)부터 조회하면 가동 시간과 무관하게 항상 잡힌다.
+    run_shell "since=\$(systemctl show -p ActiveEnterTimestamp --value agent-app); journalctl -u agent-app --no-pager --since \"\${since}\" | grep -E '\\[[1-5]/5\\]|Agent READY' || true"
 }
 
 
@@ -165,3 +170,4 @@ main() {
 }
 
 main "$@"
+

@@ -104,8 +104,14 @@ sudo getfacl -p \
 
 ### 6. 앱 Boot Sequence 및 Agent READY
 
+Boot Sequence는 서비스가 active 상태로 진입한 시점에 한 번만 출력되고, 이후
+워크로드 로그가 초 단위로 쌓인다. 서비스가 재시작 없이 오래 떠 있으면 최근
+로그(`-n`)만 봐서는 밀려나 안 잡힐 수 있으므로, `ActiveEnterTimestamp`(마지막
+active 진입 시각)부터 조회해 가동 시간과 무관하게 항상 잡히도록 한다.
+
 ```bash
-sudo journalctl -u agent-app --no-pager | grep -E "\[[1-5]/5\]|Agent READY"
+since=$(systemctl show -p ActiveEnterTimestamp --value agent-app)
+sudo journalctl -u agent-app --no-pager --since "${since}" | grep -E "\[[1-5]/5\]|Agent READY"
 ```
 
 ### 7. 앱 서비스 상태
