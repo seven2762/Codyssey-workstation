@@ -1,0 +1,16 @@
+----- ps -L (thread view) PID=9933 @ 17:38:44 -----
+    PID     TID STAT %CPU %MEM WCHAN  CMD
+   9933    9933 S     0.0  0.0 do_wai /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
+----- ps -L (thread view) PID=9941 @ 17:38:44 -----
+    PID     TID STAT %CPU %MEM WCHAN  CMD
+   9941    9941 SNl   0.0  3.7 futex_ /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
+   9941   10063 SNl   0.0  3.7 do_sel /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
+   9941   10064 SNl   0.0  3.7 do_sel /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
+----- ps -L (thread view) PID=18954 @ 18:03:58 -----
+    PID     TID STAT %CPU %MEM WCHAN  CMD
+  18954   18954 S     0.1  0.0 do_wai /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
+----- ps -L (thread view) PID=18962 @ 18:03:58 -----
+    PID     TID STAT %CPU %MEM WCHAN  CMD
+  18962   18962 SNl   0.4  3.7 futex_ /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
+  18962   19091 SNl   0.2  3.7 do_sel /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
+  18962   19092 SNl   0.3  3.7 do_sel /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
