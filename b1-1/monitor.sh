@@ -33,9 +33,10 @@ LOG_FILE="${AGENT_LOG_DIR}/monitor.log"
 CRON_LOG_FILE="${AGENT_LOG_DIR}/cron.log"
 APP_PROCESS="agent-app"
 
-# logrotate 미사용 시 스크립트 자체 로그 용량 관리 설정
+# logrotate 미사용 시 스크립트 자체 로그 용량 관리 설정.
+# 현재 로그 1개와 회전 로그 9개를 합쳐 총 10개 파일을 유지한다.
 MAX_LOG_SIZE_MB=10
-MAX_LOG_FILES=10
+MAX_LOG_FILES=9
 
 # ── 타임스탬프 ────────────────────────────────────────────────────────────
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
@@ -54,7 +55,7 @@ check_log_dir() {
     fi
 }
 
-# ── 로그 파일 용량 관리 (최대 10MB / 10개 파일 유지) ─────────────────────
+# ── 로그 파일 용량 관리 (파일당 최대 10MB / 총 10개 파일 유지) ───────────
 # 인자로 받은 로그 파일이 임계 용량을 넘으면 .1~.N 으로 순환시킨다.
 # monitor.log 와 cron.log 에 동일 정책으로 재사용한다.
 rotate_log() {
@@ -71,6 +72,12 @@ rotate_log() {
     if [ "${file_size_bytes}" -ge "${max_bytes}" ]; then
         # 최대 개수 초과 파일 삭제 (실패 시 조용히 넘기지 않고 경고)
         local oldest="${log_file}.${MAX_LOG_FILES}"
+        # 이전 정책(MAX_LOG_FILES=10)으로 이미 생성된 초과 회전 파일도
+        # 함께 정리해, 정책 변경 뒤에도 총 파일 수를 10개로 수렴시킨다.
+        local legacy_oldest="${log_file}.$(( MAX_LOG_FILES + 1 ))"
+        if [ -f "${legacy_oldest}" ]; then
+            rm -f "${legacy_oldest}" || echo "[${TIMESTAMP}] [WARNING] 초과 로그 삭제 실패: ${legacy_oldest}"
+        fi
         if [ -f "${oldest}" ]; then
             rm -f "${oldest}" || echo "[${TIMESTAMP}] [WARNING] 오래된 로그 삭제 실패: ${oldest}"
         fi

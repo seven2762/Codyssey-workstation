@@ -60,6 +60,11 @@ section "서비스"
 systemctl is-active agent-app
 systemctl status agent-app --no-pager --lines=20
 
+section "Boot Sequence 및 Agent READY"
+since="$(${SUDO} systemctl show -p ActiveEnterTimestamp --value agent-app)"
+${SUDO} journalctl -u agent-app --no-pager --since "${since}" \
+    | grep -E '\[[1-5]/5\].*\[OK\]|Agent READY'
+
 section "cron"
 ${SUDO} crontab -u agent-admin -l
 
