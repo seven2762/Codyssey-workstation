@@ -92,6 +92,17 @@ reset_demo() {
     open_shell
 }
 
+run_default() {
+    if ! machine_exists; then
+        echo "[INFO] OrbStack machine is missing; running reset-demo flow."
+        reset_demo
+        return
+    fi
+
+    start_machine
+    open_shell
+}
+
 open_shell() {
     echo "[INFO] Opening shell: ${MACHINE_NAME}"
     exec orb -m "${MACHINE_NAME}"
@@ -102,8 +113,7 @@ main() {
 
     case "${ACTION}" in
         up)
-            start_machine
-            open_shell
+            run_default
             ;;
         create)
             create_machine

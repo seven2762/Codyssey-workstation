@@ -137,12 +137,14 @@ show_log_rotation() {
     tmp_dir="$(mktemp -d)"
     ${SUDO} chown agent-admin:agent-core "${tmp_dir}" 2>/dev/null || true
     ${SUDO} chmod 770 "${tmp_dir}" 2>/dev/null || true
-    truncate -s $((10 * 1024 * 1024)) "${tmp_dir}/monitor.log"
+    # 디렉터리는 agent-admin:agent-core 770으로 넘겼으므로, 파일 생성도
+    # 실제 monitor.sh 실행 계정인 agent-admin 권한으로 수행한다.
+    run_as_agent_admin truncate -s $((10 * 1024 * 1024)) "${tmp_dir}/monitor.log"
     ${SUDO} chown agent-admin:agent-core "${tmp_dir}/monitor.log" 2>/dev/null || true
     ${SUDO} chmod 660 "${tmp_dir}/monitor.log" 2>/dev/null || true
 
     printf '\n$ ls -lh %s\n' "${tmp_dir}"
-    ls -lh "${tmp_dir}"
+    ${SUDO} ls -lh "${tmp_dir}"
 
     local quoted_tmp_dir quoted_agent_port quoted_monitor_path
     printf -v quoted_tmp_dir '%q' "${tmp_dir}"
@@ -153,9 +155,9 @@ show_log_rotation() {
     run_as_agent_admin bash -lc "export AGENT_LOG_DIR=${quoted_tmp_dir}; export AGENT_PORT=${quoted_agent_port}; /bin/bash ${quoted_monitor_path}" || true
 
     printf '\n$ ls -lh %s\n' "${tmp_dir}"
-    ls -lh "${tmp_dir}"
+    ${SUDO} ls -lh "${tmp_dir}"
 
-    rm -rf "${tmp_dir}"
+    ${SUDO} rm -rf "${tmp_dir}"
 }
 
 main() {
@@ -170,4 +172,3 @@ main() {
 }
 
 main "$@"
-
