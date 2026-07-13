@@ -1,24 +1,7 @@
------ ps -L (thread view) PID=7757 @ 16:02:13 -----
-    PID     TID STAT %CPU %MEM WCHAN  CMD
-   7757    7757 S     0.1  0.0 do_wai /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
------ ps -L (thread view) PID=7765 @ 16:02:13 -----
-    PID     TID STAT %CPU %MEM WCHAN  CMD
-   7765    7765 SNl   0.3  5.0 futex_ /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
-   7765    7887 SNl   0.3  5.0 do_sel /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
-   7765    7888 SNl   0.7  5.0 do_sel /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
------ ps -L (thread view) PID=11866 @ 17:54:00 -----
-    PID     TID STAT %CPU %MEM WCHAN  CMD
-  11866   11866 S     0.1  0.0 do_wai /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
------ ps -L (thread view) PID=11874 @ 17:54:00 -----
-    PID     TID STAT %CPU %MEM WCHAN  CMD
-  11874   11874 SNl   0.3  5.0 futex_ /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
-  11874   12004 SNl   0.3  5.0 do_sel /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
-  11874   12005 SNl   0.7  5.0 do_sel /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
------ ps -L (thread view) PID=14085 @ 17:56:50 -----
-    PID     TID STAT %CPU %MEM WCHAN  CMD
-  14085   14085 S     0.1  0.0 do_wai /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
------ ps -L (thread view) PID=14093 @ 17:56:50 -----
-    PID     TID STAT %CPU %MEM WCHAN  CMD
-  14093   14093 SNl   0.3  5.0 futex_ /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
-  14093   14222 SNl   0.3  5.0 do_sel /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
-  14093   14223 SNl   0.7  5.0 do_sel /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
+----- process tree @ 2026-07-13 21:44:34 -----
+    PID    PPID     TID STAT %CPU %MEM WCHAN  CMD
+   4875    4858    4875 S     0.1  0.0 do_wai /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
+    PID    PPID     TID STAT %CPU %MEM WCHAN  CMD
+   4885    4875    4885 SNl   0.3  5.0 futex_ /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
+   4885    4875    5014 SNl   0.3  5.0 do_sel /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
+   4885    4875    5017 SNl   0.7  5.0 do_sel /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app

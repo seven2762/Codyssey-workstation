@@ -14,8 +14,8 @@
 ------------------------------------------------------------
 All Boot Checks Passed!
 Agent READY
-2026-07-07 18:01:04,591 [INFO] [SafetyGuard] Process priority lowered (nice=10).
-2026-07-07 18:01:04,593 [INFO] Agent listening at port 15034
+2026-07-13 21:41:24,127 [INFO] [SafetyGuard] Process priority lowered (nice=10).
+2026-07-13 21:41:24,129 [INFO] Agent listening at port 15034
 
 ==================================================
  [ Agent Initiate ] Resource Check 
@@ -27,11 +27,11 @@ Agent READY
  >>> SYSTEM STATUS: STABLE. STARTING WORKLOAD MONITORING...
 ==================================================
 
-2026-07-07 18:01:06,621 [INFO] [MemoryWorker] Current Heap: 25MB
-2026-07-07 18:01:09,648 [INFO] [MemoryWorker] Current Heap: 50MB
-2026-07-07 18:01:12,674 [INFO] [MemoryWorker] Current Heap: 75MB
-2026-07-07 18:01:15,699 [INFO] [MemoryWorker] Current Heap: 100MB
-2026-07-07 18:01:18,736 [INFO] [MemoryWorker] Current Heap: 125MB
-2026-07-07 18:01:21,773 [INFO] [MemoryWorker] Current Heap: 150MB
-2026-07-07 18:01:21,773 [CRITICAL] [MemoryGuard] Memory limit exceeded (150MB >= 128MB) / (Recommend Over 256MB)
-2026-07-07 18:01:21,773 [CRITICAL] [MemoryGuard] Self-terminating process 15395 to prevent system instability.
+2026-07-13 21:41:26,148 [INFO] [MemoryWorker] Current Heap: 25MB
+2026-07-13 21:41:29,169 [INFO] [MemoryWorker] Current Heap: 50MB
+2026-07-13 21:41:32,189 [INFO] [MemoryWorker] Current Heap: 75MB
+2026-07-13 21:41:35,218 [INFO] [MemoryWorker] Current Heap: 100MB
+2026-07-13 21:41:38,241 [INFO] [MemoryWorker] Current Heap: 125MB
+2026-07-13 21:41:41,277 [INFO] [MemoryWorker] Current Heap: 150MB
+2026-07-13 21:41:41,278 [CRITICAL] [MemoryGuard] Memory limit exceeded (150MB >= 128MB) / (Recommend Over 256MB)
+2026-07-13 21:41:41,279 [CRITICAL] [MemoryGuard] Self-terminating process 1220 to prevent system instability.

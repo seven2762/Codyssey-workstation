@@ -73,7 +73,7 @@ assert_not_contains() {
 assert_command_succeeds() {
     local description=$1
     shift
-    if "$@"; then
+    if "$@" >/dev/null 2>&1; then
         pass "$description"
     else
         fail "$description"
@@ -312,6 +312,8 @@ assert_contains "$ROOT_DIR/evidence/deadlock/app.log" 'Status: BLOCKED' \
     "legacy Deadlock evidence records blocked workers"
 assert_contains "$ROOT_DIR/evidence/deadlock/threads_snapshot.txt" 'futex' \
     "legacy Deadlock evidence records kernel lock waits"
+assert_command_succeeds "checked-in VM evidence passes the full verifier" \
+    env EVIDENCE_ROOT="$ROOT_DIR/evidence" bash "$ROOT_DIR/verify-results.sh"
 
 if [ "$FAILURES" -gt 0 ]; then
     printf '\n%d submission check(s) failed.\n' "$FAILURES" >&2

@@ -120,7 +120,7 @@ instant_cpu() {
 # 대상 PID 한 개를 샘플링하여 한 줄 기록. 살아있으면 0, 죽었으면 1 반환.
 sample_once() {
     local pid=$1
-    local line stat rss nlwp etimes rss_mb pcpu note=""
+    local line stat rss nlwp etimes rss_mb pcpu note="" formatted
     line=$(ps -o stat=,rss=,nlwp=,etimes= -p "$pid" 2>/dev/null)
     if [ -z "$line" ]; then
         return 1
@@ -149,8 +149,12 @@ sample_once() {
         D*) note="${note}[STATE D: blocked] " ;;
     esac
 
-    log "$(printf '%-25s | %-6s | %-4s | %-6s | %-8s | %-7s | %-8s %s' \
-        "$(ts)" "$pid" "$stat" "$pcpu" "$rss_mb" "$nlwp" "${etimes}s" "$note")"
+    printf -v formatted '%-25s | %-6s | %-4s | %-6s | %-8s | %-7s | %-8s %s' \
+        "$(ts)" "$pid" "$stat" "$pcpu" "$rss_mb" "$nlwp" "${etimes}s" "$note"
+    # 고정폭 컬럼 뒤의 패딩은 가독성에 필요하지만 줄 끝 공백은 증거 diff를
+    # 불필요하게 더럽힌다. 마지막 비공백 이후의 suffix만 제거한다.
+    formatted=${formatted%"${formatted##*[![:space:]]}"}
+    log "$formatted"
 
     # 스레드별 상세(Deadlock 진단용): TID/상태/CPU/대기지점(WCHAN)
     if [ "$THREADS" = "1" ]; then
