@@ -83,7 +83,7 @@ assert_command_succeeds() {
 assert_command_fails() {
     local description=$1
     shift
-    if "$@"; then
+    if "$@" >/dev/null 2>&1; then
         fail "$description (command unexpectedly succeeded)"
     else
         pass "$description"
@@ -198,11 +198,17 @@ run_all_contract_test() {
 
 write_base_fixture() {
     local root=$1 label=$2 memory=$3 cpu=$4 multithread=$5 timed_out=$6 exit_code=$7
+    local multithread_display
+    if [ "$multithread" = "true" ]; then
+        multithread_display=True
+    else
+        multithread_display=False
+    fi
     mkdir -p "$root/$label"
     printf '%s\n' \
         'All Boot Checks Passed!' \
         'Agent READY' \
-        "... MEMORY_LIMIT=${memory}MB, CPU_MAX_OCCUPY=${cpu}%, MULTI_THREAD_ENABLE=${multithread}" \
+        "... MEMORY_LIMIT=${memory}MB, CPU_MAX_OCCUPY=${cpu}%, MULTI_THREAD_ENABLE=${multithread_display}" \
         > "$root/$label/app.log"
     printf '%s\n' 'monitor sample' > "$root/$label/monitor.log"
     printf '%s\n' \
@@ -222,13 +228,13 @@ run_verifier_contract_test() {
     evidence="$tmp/evidence"
     output="$tmp/verify.stdout"
 
-    write_base_fixture "$evidence" oom_before 128 50 False false 137
-    write_base_fixture "$evidence" oom_after 512 50 False true 143
-    write_base_fixture "$evidence" cpu_before 512 90 False false 143
-    write_base_fixture "$evidence" cpu_after 512 40 False true 143
-    write_base_fixture "$evidence" deadlock_before 512 50 True true 143
-    write_base_fixture "$evidence" deadlock_after 512 50 False true 143
-    write_base_fixture "$evidence" scheduling 512 10 False true 143
+    write_base_fixture "$evidence" oom_before 128 50 false false 137
+    write_base_fixture "$evidence" oom_after 512 50 false true 143
+    write_base_fixture "$evidence" cpu_before 512 90 false false 143
+    write_base_fixture "$evidence" cpu_after 512 40 false true 143
+    write_base_fixture "$evidence" deadlock_before 512 50 true true 143
+    write_base_fixture "$evidence" deadlock_after 512 50 false true 143
+    write_base_fixture "$evidence" scheduling 512 10 false true 143
 
     printf '%s\n' '[CRITICAL] Memory limit exceeded' >> "$evidence/oom_before/app.log"
     printf '%s\n' '>>> [SYSTEM] MEMORY RECOVERED (Cache Cleared) <<<' >> "$evidence/oom_after/app.log"
@@ -271,6 +277,10 @@ run_host_cli_contract_test() {
     assert_contains "$output" 'verify' "host CLI documents VM/evidence verification"
     assert_contains "$output" 'reset-demo' "host CLI documents clean-room demo flow"
     assert_contains "$output" 'collect' "host CLI documents evidence collection"
+
+    assert_command_fails "host CLI rejects option/path-like machine names" \
+        env MACHINE_NAME='../unsafe' ORB_BIN=/usr/bin/true \
+        bash "$ROOT_DIR/orbstack-machine.sh" list
 }
 
 assert_executable "$ROOT_DIR/monitor.sh" "monitor.sh is directly executable"
