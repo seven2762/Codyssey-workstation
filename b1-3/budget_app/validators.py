@@ -13,6 +13,12 @@ from .errors import ValidationError
 TransactionType = Literal["income", "expense"]
 
 
+def has_unprintable_characters(value: str) -> bool:
+    """줄바꿈, 탭, 제어문자, 비가시 Unicode 문자가 포함됐는지 확인한다."""
+
+    return any(not character.isprintable() for character in value)
+
+
 def validate_path(value: str | PathLike[str], field_name: str = "경로") -> Path:
     try:
         raw_path = fspath(value)
@@ -20,8 +26,11 @@ def validate_path(value: str | PathLike[str], field_name: str = "경로") -> Pat
         raise ValidationError(f"{field_name}가 올바르지 않습니다.", f"유효한 {field_name}를 입력해 주세요.") from error
     if not isinstance(raw_path, str) or not raw_path.strip():
         raise ValidationError(f"{field_name}는 비어 있을 수 없습니다.", f"유효한 {field_name}를 입력해 주세요.")
-    if "\x00" in raw_path:
-        raise ValidationError(f"{field_name}에 NUL 문자를 사용할 수 없습니다.", f"유효한 {field_name}를 입력해 주세요.")
+    if has_unprintable_characters(raw_path):
+        raise ValidationError(
+            f"{field_name}에 제어문자나 비표시 문자를 사용할 수 없습니다.",
+            f"한 줄의 유효한 {field_name}를 입력해 주세요.",
+        )
     return Path(raw_path)
 
 
@@ -109,9 +118,9 @@ def validate_name(value: object, field_name: str = "카테고리") -> str:
     normalized = value.strip()
     if not normalized:
         raise ValidationError(f"{field_name}는 비어 있을 수 없습니다.", f"{field_name} 이름을 입력해 주세요.")
-    if any(character in normalized for character in ("\n", "\r", "\t")):
+    if has_unprintable_characters(normalized):
         raise ValidationError(
-            f"{field_name}에 줄바꿈이나 탭을 사용할 수 없습니다.",
+            f"{field_name}에 제어문자나 비표시 문자를 사용할 수 없습니다.",
             "한 줄의 이름을 입력해 주세요.",
         )
     return normalized
@@ -133,7 +142,7 @@ def parse_tags(value: str | Iterable[object] | None) -> tuple[str, ...]:
             raise ValidationError("각 태그는 문자열이어야 합니다.", "태그를 쉼표로 구분해 입력해 주세요.")
         tag = candidate.strip()
         if tag and tag not in seen:
-            if any(character in tag for character in ("\n", "\r", "\t", ",")):
+            if has_unprintable_characters(tag) or "," in tag:
                 raise ValidationError("태그 형식이 올바르지 않습니다.", "태그는 쉼표로 구분해 입력해 주세요.")
             result.append(tag)
             seen.add(tag)

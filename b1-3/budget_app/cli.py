@@ -149,7 +149,7 @@ def _dispatch(service: LedgerService, args: argparse.Namespace) -> int:
         _handle_update(service, args)
     elif args.command == "delete":
         service.delete_transaction(args.id)
-        print(f"삭제 완료 - id: {args.id}")
+        print(f"삭제 완료 - id: {_display_text(args.id)}")
     elif args.command == "import":
         count = service.import_csv(args.source)
         print(f"가져오기 완료: {count}건")
@@ -160,7 +160,7 @@ def _dispatch(service: LedgerService, args: argparse.Namespace) -> int:
             date_from=args.date_from,
             date_to=args.date_to,
         )
-        print(f"내보내기 완료: {count}건 - {args.out}")
+        print(f"내보내기 완료: {count}건 - {_display_text(args.out)}")
     return 0
 
 
@@ -168,7 +168,7 @@ def _add_interactively(service: LedgerService) -> int:
     date = _prompt("날짜 (YYYY-MM-DD): ", validate_date)
     transaction_type = _prompt("타입 (income/expense): ", validate_type)
     categories = service.list_categories()
-    print(f"등록 카테고리: {', '.join(categories)}")
+    print(f"등록 카테고리: {', '.join(_display_text(item) for item in categories)}")
 
     def registered_category(value: str) -> str:
         category = validate_name(value)
@@ -191,7 +191,7 @@ def _add_interactively(service: LedgerService) -> int:
         memo=memo,
         tags=tags,
     )
-    print(f"저장 완료 - id: {transaction.id}")
+    print(f"저장 완료 - id: {_display_text(transaction.id)}")
     return 0
 
 
@@ -201,7 +201,10 @@ def _prompt(prompt: str, parser: Callable[[str], T]) -> T:
         try:
             return parser(raw_value)
         except ValidationError as error:
-            print(f"입력 오류: {error} ({error.hint})", file=sys.stderr)
+            print(
+                f"입력 오류: {_display_text(str(error))} ({_display_text(error.hint)})",
+                file=sys.stderr,
+            )
 
 
 def _handle_update(service: LedgerService, args: argparse.Namespace) -> None:
@@ -218,7 +221,7 @@ def _handle_update(service: LedgerService, args: argparse.Namespace) -> None:
         if value is not None
     }
     transaction = service.update_transaction(args.id, updates)
-    print(f"수정 완료 - id: {transaction.id}")
+    print(f"수정 완료 - id: {_display_text(transaction.id)}")
 
 
 def _handle_budget(service: LedgerService, args: argparse.Namespace) -> None:
@@ -242,27 +245,31 @@ def _handle_budget(service: LedgerService, args: argparse.Namespace) -> None:
 def _handle_category(service: LedgerService, args: argparse.Namespace) -> None:
     if args.category_command == "add":
         if service.add_category(args.name):
-            print(f"카테고리 추가 완료: {args.name.strip()}")
+            print(f"카테고리 추가 완료: {_display_text(args.name.strip())}")
         else:
-            print(f"이미 등록된 카테고리: {args.name.strip()}")
+            print(f"이미 등록된 카테고리: {_display_text(args.name.strip())}")
     elif args.category_command == "remove":
         if service.remove_category(args.name):
-            print(f"카테고리 삭제 완료: {args.name.strip()}")
+            print(f"카테고리 삭제 완료: {_display_text(args.name.strip())}")
         else:
-            print(f"없는 카테고리: {args.name.strip()}")
+            print(f"없는 카테고리: {_display_text(args.name.strip())}")
     else:
         for category in service.list_categories():
-            print(category)
+            print(_display_text(category))
 
 
 def _print_transactions(transactions: Iterable[Transaction]) -> None:
     count = 0
     for transaction in transactions:
-        tags = ",".join(transaction.tags) or "-"
-        memo = transaction.memo or "-"
+        transaction_id = _display_text(transaction.id)
+        date = _display_text(transaction.date)
+        transaction_type = _display_text(transaction.type)
+        category = _display_text(transaction.category)
+        tags = _display_text(",".join(transaction.tags)) or "-"
+        memo = _display_text(transaction.memo) or "-"
         print(
-            f"{transaction.id} | {transaction.date} | {transaction.type:<7} | "
-            f"{transaction.category} | {_money(transaction.amount)} | {memo} | {tags}"
+            f"{transaction_id} | {date} | {transaction_type:<7} | "
+            f"{category} | {_money(transaction.amount)} | {memo} | {tags}"
         )
         count += 1
     if count == 0:
@@ -278,7 +285,7 @@ def _print_summary(summary: MonthlySummary) -> None:
     if summary.category_expenses:
         print("카테고리별 지출 TOP")
         for rank, (category, amount) in enumerate(summary.category_expenses, start=1):
-            print(f"  {rank}. {category}: {_money(amount)}")
+            print(f"  {rank}. {_display_text(category)}: {_money(amount)}")
     if summary.budget is not None:
         print(f"예산: {_money(summary.budget)}")
         print(f"예산 사용률: {summary.budget_usage_percent:.1f}%")
@@ -300,6 +307,22 @@ def _money(amount: int) -> str:
     return f"{sign}{remaining}{suffix}"
 
 
+def _display_text(value: str) -> str:
+    """콘솔 한 줄과 ` | ` 구분 구조를 깨는 문자를 가시적으로 이스케이프한다."""
+
+    escaped: list[str] = []
+    for character in value:
+        if character == "\\":
+            escaped.append("\\\\")
+        elif character == "|":
+            escaped.append("\\u007c")
+        elif character.isprintable():
+            escaped.append(character)
+        else:
+            escaped.append(character.encode("unicode_escape").decode("ascii"))
+    return "".join(escaped)
+
+
 def _print_error(error: AppError) -> None:
-    print(f"오류: {error}", file=sys.stderr)
-    print(f"해결 방법: {error.hint}", file=sys.stderr)
+    print(f"오류: {_display_text(str(error))}", file=sys.stderr)
+    print(f"해결 방법: {_display_text(error.hint)}", file=sys.stderr)

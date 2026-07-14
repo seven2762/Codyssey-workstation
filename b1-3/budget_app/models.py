@@ -9,6 +9,7 @@ from typing import Any, cast
 from .errors import ValidationError
 from .validators import (
     TransactionType,
+    has_unprintable_characters,
     parse_tags,
     validate_amount,
     validate_date,
@@ -44,6 +45,11 @@ class Transaction:
         identifier = transaction_id.strip()
         if not identifier:
             raise ValidationError("거래 id는 비어 있을 수 없습니다.", "유효한 거래 id를 지정해 주세요.")
+        if has_unprintable_characters(identifier):
+            raise ValidationError(
+                "거래 id에 제어문자나 비표시 문자를 사용할 수 없습니다.",
+                "한 줄의 유효한 거래 id를 지정해 주세요.",
+            )
         return cls(
             id=identifier,
             date=validate_date(date),
@@ -121,6 +127,8 @@ class SearchCriteria:
             query = self.query.strip()
             if not query:
                 raise ValidationError("검색어는 비어 있을 수 없습니다.", "--q에 검색할 메모 내용을 입력해 주세요.")
+            if has_unprintable_characters(query):
+                raise ValidationError("검색어에 제어문자나 비표시 문자를 사용할 수 없습니다.")
             object.__setattr__(self, "query", query)
         if self.tag is not None:
             if not isinstance(self.tag, str):
@@ -128,6 +136,8 @@ class SearchCriteria:
             tag = self.tag.strip()
             if not tag:
                 raise ValidationError("검색 태그는 비어 있을 수 없습니다.")
+            if has_unprintable_characters(tag):
+                raise ValidationError("검색 태그에 제어문자나 비표시 문자를 사용할 수 없습니다.")
             object.__setattr__(self, "tag", tag)
 
     def matches(self, transaction: Transaction) -> bool:
@@ -181,7 +191,13 @@ class MonthlySummary:
 def validate_memo(value: object) -> str:
     if not isinstance(value, str):
         raise ValidationError("메모는 문자열이어야 합니다.", "메모를 문자열로 입력하거나 비워 주세요.")
-    return value.strip()
+    normalized = value.strip()
+    if has_unprintable_characters(normalized):
+        raise ValidationError(
+            "메모에 제어문자나 비표시 문자를 사용할 수 없습니다.",
+            "한 줄의 메모를 입력하거나 비워 주세요.",
+        )
+    return normalized
 
 
 def _estimated_decimal_digits(value: int) -> int:
