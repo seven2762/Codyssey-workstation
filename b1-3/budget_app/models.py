@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
+from decimal import Decimal, localcontext
 from typing import Any, cast
 
 from .errors import ValidationError
@@ -161,10 +162,16 @@ class MonthlySummary:
         return self.transaction_count > 0
 
     @property
-    def budget_usage_percent(self) -> float | None:
+    def budget_usage_percent(self) -> Decimal | None:
         if self.budget is None:
             return None
-        return self.total_expense / self.budget * 100
+        precision = max(
+            _estimated_decimal_digits(self.total_expense),
+            _estimated_decimal_digits(self.budget),
+        ) + 10
+        with localcontext() as context:
+            context.prec = max(28, precision)
+            return Decimal(self.total_expense) * Decimal(100) / Decimal(self.budget)
 
     @property
     def is_budget_exceeded(self) -> bool:
@@ -175,3 +182,11 @@ def validate_memo(value: object) -> str:
     if not isinstance(value, str):
         raise ValidationError("메모는 문자열이어야 합니다.", "메모를 문자열로 입력하거나 비워 주세요.")
     return value.strip()
+
+
+def _estimated_decimal_digits(value: int) -> int:
+    """정수 문자열 변환 없이 Decimal 계산에 충분한 자릿수를 구한다."""
+
+    if value == 0:
+        return 1
+    return (abs(value).bit_length() * 30103) // 100000 + 1

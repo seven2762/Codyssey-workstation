@@ -104,6 +104,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         configure_file_logging(data_dir / "budget_app.log")
         service = LedgerService(data_dir)
         return _dispatch(service, args)
+    except BrokenPipeError:
+        LOGGER.info("output pipe closed by consumer")
+        return 0
     except AppError as error:
         _print_error(error)
         return 1
@@ -284,7 +287,17 @@ def _print_summary(summary: MonthlySummary) -> None:
 
 
 def _money(amount: int) -> str:
-    return f"{amount:,}"
+    sign = "-" if amount < 0 else ""
+    remaining = abs(amount)
+    if remaining < 1000:
+        return f"{sign}{remaining}"
+
+    groups: list[int] = []
+    while remaining >= 1000:
+        remaining, group = divmod(remaining, 1000)
+        groups.append(group)
+    suffix = "".join(f",{group:03d}" for group in reversed(groups))
+    return f"{sign}{remaining}{suffix}"
 
 
 def _print_error(error: AppError) -> None:
