@@ -1,8 +1,0 @@
------ ps -L (thread view) PID=17973 @ 18:03:20 -----
-    PID     TID STAT %CPU %MEM WCHAN  CMD
-  17973   17973 S     0.1  0.0 do_wai /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
------ ps -L (thread view) PID=17981 @ 18:03:20 -----
-    PID     TID STAT %CPU %MEM WCHAN  CMD
-  17981   17981 SNl   0.3  0.3 futex_ /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
-  17981   18207 SNl   0.0  0.3 futex_ /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
-  17981   18208 SNl   0.0  0.3 futex_ /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
