@@ -127,13 +127,23 @@ WHERE id NOT IN (SELECT book_id FROM rental)
 ORDER BY title;
 
 -- Q15. 평균 대여 횟수보다 많이 빌린 '단골' 회원 (중첩 서브쿼리 + HAVING).
-SELECT m.name AS member, COUNT(r.id) AS rental_count
+--   [로직 분해 - 안쪽 서브쿼리에서 바깥으로 3단계로 읽는다]
+--     1단계(가장 안쪽): 회원별 대여 횟수 목록을 만든다.
+--                       rental 을 member_id 로 묶어 각 회원의 대여 건수(cnt)를 뽑음
+--                       -> 예) [3, 2, 2, 2, 1, ...]  (회원 1명당 1행)
+--     2단계(중간):      그 횟수들의 '평균'을 구한다.
+--                       1단계 결과를 AVG 로 집계 -> 회원 1명당 평균 대여 횟수 스칼라 값 1개
+--                       -> 예) 2.0
+--     3단계(바깥):      회원별 대여 횟수를 다시 집계하고,
+--                       HAVING 으로 그 값이 2단계 평균보다 '큰' 회원만 남긴다.
+--                       -> 결과: 평균을 초과한 단골 회원 (예) 김서준 3회)
+SELECT m.name AS member, COUNT(r.id) AS rental_count   -- 3단계: 회원별 대여 횟수 집계
 FROM member m
 INNER JOIN rental r ON r.member_id = m.id
 GROUP BY m.id
-HAVING COUNT(r.id) > (
-    SELECT AVG(cnt) FROM (
-        SELECT COUNT(*) AS cnt FROM rental GROUP BY member_id
+HAVING COUNT(r.id) > (                                  -- 3단계 필터: (회원 대여수) > (평균)
+    SELECT AVG(cnt) FROM (                              -- 2단계: 횟수들의 평균
+        SELECT COUNT(*) AS cnt FROM rental GROUP BY member_id  -- 1단계: 회원별 대여 횟수 목록
     )
 )
 ORDER BY rental_count DESC;
