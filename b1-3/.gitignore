@@ -5,3 +5,4 @@ tests/
 /test.sh
 *.log
 .coverage-trace/
+demo-run/
