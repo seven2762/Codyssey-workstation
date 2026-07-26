@@ -127,6 +127,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 
 def _dispatch(service: LedgerService, args: argparse.Namespace) -> int:
+    """파싱된 하위 명령을 알맞은 서비스 호출로 연결하고 결과를 출력한다."""
+
     if args.command == "add":
         return _add_interactively(service)
     if args.command == "list":
@@ -167,12 +169,16 @@ def _dispatch(service: LedgerService, args: argparse.Namespace) -> int:
 
 
 def _add_interactively(service: LedgerService) -> int:
+    """거래에 필요한 값을 한 항목씩 대화형으로 입력받아 한 건을 저장한다."""
+
     date = _prompt("날짜 (YYYY-MM-DD): ", validate_date)
     transaction_type = _prompt("타입 (income/expense): ", validate_type)
     categories = service.list_categories()
     print(f"등록 카테고리: {', '.join(_display_text(item) for item in categories)}")
 
     def registered_category(value: str) -> str:
+        """입력한 카테고리가 등록된 것인지 확인하는 프롬프트용 파서."""
+
         category = validate_name(value)
         if category not in service.list_categories():
             raise ValidationError(
@@ -198,6 +204,8 @@ def _add_interactively(service: LedgerService) -> int:
 
 
 def _prompt(prompt: str, parser: Callable[[str], T]) -> T:
+    """검증에 통과할 때까지 다시 물어보며, 통과한 값을 파싱해 돌려준다."""
+
     while True:
         raw_value = input(prompt)
         try:
@@ -210,6 +218,8 @@ def _prompt(prompt: str, parser: Callable[[str], T]) -> T:
 
 
 def _handle_update(service: LedgerService, args: argparse.Namespace) -> None:
+    """지정된(None이 아닌) 옵션만 모아 수정 요청으로 넘긴다."""
+
     updates = {
         key: value
         for key, value in {
@@ -227,6 +237,8 @@ def _handle_update(service: LedgerService, args: argparse.Namespace) -> None:
 
 
 def _handle_budget(service: LedgerService, args: argparse.Namespace) -> None:
+    """budget 하위 명령(set/get/list)을 분기해 예산을 설정·조회한다."""
+
     if args.budget_command == "set":
         service.set_budget(args.month, args.amount)
         print(f"예산 저장 완료 - {args.month}: {_money(validate_amount(args.amount))}")
@@ -245,6 +257,8 @@ def _handle_budget(service: LedgerService, args: argparse.Namespace) -> None:
 
 
 def _handle_category(service: LedgerService, args: argparse.Namespace) -> None:
+    """category 하위 명령(add/remove/list)을 분기해 카테고리를 관리한다."""
+
     if args.category_command == "add":
         if service.add_category(args.name):
             print(f"카테고리 추가 완료: {_display_text(args.name.strip())}")
@@ -261,6 +275,8 @@ def _handle_category(service: LedgerService, args: argparse.Namespace) -> None:
 
 
 def _print_transactions(transactions: Iterable[Transaction]) -> None:
+    """거래들을 ` | `로 구분된 한 줄씩 출력하고, 없으면 안내 문구를 낸다."""
+
     count = 0
     for transaction in transactions:
         transaction_id = _display_text(transaction.id)
@@ -279,6 +295,8 @@ def _print_transactions(transactions: Iterable[Transaction]) -> None:
 
 
 def _print_summary(summary: MonthlySummary) -> None:
+    """월 요약(수입·지출·잔액, 지출 TOP, 예산 사용률·초과)을 출력한다."""
+
     if not summary.has_transactions:
         print(f"{summary.month}: 데이터 없음")
     print(f"총 수입: {_money(summary.total_income)}")
@@ -296,10 +314,10 @@ def _print_summary(summary: MonthlySummary) -> None:
 
 
 def _money(amount: int) -> str:
+    """정수 금액을 천 단위 쉼표로 끊어 문자열로 만든다(임의 자릿수 지원)."""
+
     sign = "-" if amount < 0 else ""
     remaining = abs(amount)
-    if remaining < 1000:
-        return f"{sign}{remaining}"
 
     groups: list[int] = []
     while remaining >= 1000:
