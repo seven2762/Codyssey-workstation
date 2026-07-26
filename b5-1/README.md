@@ -31,6 +31,35 @@ sqlite3 library.db < queries.sql
 
 > `library.db`는 스크립트로 매번 재생성되는 산출물이라 저장소에는 커밋하지 않는다(`.gitignore`).
 
+## DB 접속 · 조회 (sqlite3 CLI)
+
+SQLite는 서버가 없고 `library.db` 파일 자체가 DB다. "접속"은 곧 그 파일을 여는 것.
+
+```bash
+# 대화형 접속 (sqlite> 프롬프트)
+sqlite3 library.db
+sqlite3 -box library.db      # 결과를 표로 보고 싶을 때
+
+# 접속 없이 한 줄 실행
+sqlite3 library.db "SELECT * FROM member;"
+sqlite3 -box library.db "SELECT * FROM rental;"
+sqlite3 library.db < queries.sql          # SQL 파일 통째로 실행
+```
+
+접속 후 자주 쓰는 점(dot) 명령:
+
+```text
+.tables            -- 테이블 목록
+.schema book       -- 특정 테이블 구조 보기
+.mode box          -- 결과를 표 형태로 출력
+.headers on        -- 컬럼명 표시
+.read queries.sql  -- SQL 파일 실행
+.quit              -- 종료
+```
+
+GUI로 보려면 DB Browser for SQLite · DBeaver · TablePlus 등에서
+**SQLite 연결**로 `library.db` 파일을 열면 된다.
+
 ## ERD (관계도)
 
 ```mermaid
