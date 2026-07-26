@@ -143,6 +143,28 @@ class TransactionRepository:
 
         _atomic_write(self.path, combined_records())
 
+    def upsert_many_atomic(self, transactions: Iterable[Transaction]) -> None:
+        """id가 겹치는 기존 거래는 제자리에서 교체하고, 나머지는 뒤에 추가한다."""
+
+        incoming: dict[str, dict[str, Any]] = {}
+        for transaction in transactions:
+            incoming[transaction.id] = transaction.to_dict()
+
+        def combined_records() -> Iterator[dict[str, Any]]:
+            applied: set[str] = set()
+            for record in _json_records(self.path):
+                record_id = record.get("id")
+                if isinstance(record_id, str) and record_id in incoming and record_id not in applied:
+                    applied.add(record_id)
+                    yield incoming[record_id]
+                else:
+                    yield record
+            for transaction_id, record in incoming.items():
+                if transaction_id not in applied:
+                    yield record
+
+        _atomic_write(self.path, combined_records())
+
     def iter_transactions(self, *, latest_first: bool = True) -> Iterator[Transaction]:
         for record in _json_records(self.path, reverse=latest_first):
             try:
@@ -206,15 +228,20 @@ class CategoryStore:
             raise StorageError(f"카테고리 저장 파일을 초기화할 수 없습니다: {error}") from error
 
     def list(self) -> list[str]:
+        # 카테고리는 집합이므로, 파일이 외부 편집으로 중복되어도 읽을 때 정리한다.
         categories: list[str] = []
+        seen: set[str] = set()
         for record in _json_records(self.path):
             try:
-                categories.append(validate_name(record["name"]))
+                name = validate_name(record["name"])
             except (KeyError, ValidationError) as error:
                 raise StorageError(
                     f"{self.path.name}에 유효하지 않은 카테고리가 있습니다.",
                     "각 줄을 {\"name\": \"카테고리\"} 형식으로 수정해 주세요.",
                 ) from error
+            if name not in seen:
+                seen.add(name)
+                categories.append(name)
         return categories
 
     def contains(self, category: str) -> bool:

@@ -6,7 +6,6 @@ from collections import defaultdict
 from collections.abc import Iterator
 import csv
 from itertools import islice
-import json
 import logging
 import os
 from pathlib import Path
@@ -19,7 +18,10 @@ from .models import MonthlySummary, SearchCriteria, Transaction
 from .repositories import BudgetStore, CategoryStore, TransactionRepository
 from .validators import parse_tags, validate_amount, validate_month, validate_name, validate_path
 
-CSV_COLUMNS = ("date", "type", "category", "amount", "memo", "tags")
+# import 시 반드시 있어야 하는 데이터 열. `id`는 선택이며 있으면 upsert 키로 쓴다.
+CSV_DATA_COLUMNS = ("date", "type", "category", "amount", "memo", "tags")
+# export가 쓰는 전체 열 순서. `id`를 함께 내보내 재가져오기가 멱등이 되도록 한다.
+CSV_COLUMNS = ("id", *CSV_DATA_COLUMNS)
 LOGGER = logging.getLogger("budget_app")
 
 
@@ -58,9 +60,15 @@ class LedgerService:
         return transaction
 
     def list_transactions(self, limit: int = 20) -> list[Transaction]:
-        if isinstance(limit, bool) or limit <= 0:
-            raise ValidationError("--limit은 1 이상의 정수여야 합니다.")
-        return list(islice(self.transactions.iter_transactions(), limit))
+        if isinstance(limit, bool) or limit < 0:
+            raise ValidationError(
+                "--limit은 0 이상의 정수여야 합니다.",
+                "전체를 보려면 0을, 개수를 제한하려면 1 이상을 지정해 주세요.",
+            )
+        transactions = self.transactions.iter_transactions()
+        if limit == 0:
+            return list(transactions)
+        return list(islice(transactions, limit))
 
     def search_transactions(self, criteria: SearchCriteria) -> Iterator[Transaction]:
         return (
@@ -152,38 +160,29 @@ class LedgerService:
     @log_execution
     def import_csv(self, source: Path | str) -> int:
         source_path = validate_path(source, "가져오기 CSV 경로")
-        count = 0
         try:
-            with (
-                source_path.open("r", encoding="utf-8-sig", newline="") as source_file,
-                tempfile.SpooledTemporaryFile(
-                    mode="w+", max_size=1024 * 1024, encoding="utf-8", newline="\n"
-                ) as spool,
-            ):
+            with source_path.open("r", encoding="utf-8-sig", newline="") as source_file:
                 reader = csv.DictReader(source_file)
-                missing = set(CSV_COLUMNS) - set(reader.fieldnames or ())
+                missing = set(CSV_DATA_COLUMNS) - set(reader.fieldnames or ())
                 if missing:
                     raise ValidationError(
                         f"CSV 헤더에 필수 열이 없습니다: {', '.join(sorted(missing))}",
-                        f"헤더를 {','.join(CSV_COLUMNS)} 순서로 작성해 주세요.",
+                        f"헤더를 {','.join(CSV_DATA_COLUMNS)} 순서로 작성해 주세요.",
                     )
-                for row_number, row in enumerate(reader, start=2):
-                    try:
-                        transaction = self._transaction_from_csv_row(row)
-                    except ValidationError as error:
-                        raise ValidationError(
-                            f"CSV {row_number}행이 올바르지 않습니다: {error}",
-                            error.hint,
-                        ) from error
-                    spool.write(json.dumps(transaction.to_dict(), ensure_ascii=False) + "\n")
-                    count += 1
-                spool.seek(0)
+                rows = list(reader)
 
-                def transactions() -> Iterator[Transaction]:
-                    for line in spool:
-                        yield Transaction.from_dict(json.loads(line))
+            transactions: list[Transaction] = []
+            for row_number, row in enumerate(rows, start=2):
+                try:
+                    transactions.append(self._transaction_from_csv_row(row))
+                except ValidationError as error:
+                    raise ValidationError(
+                        f"CSV {row_number}행이 올바르지 않습니다: {error}",
+                        error.hint,
+                    ) from error
 
-                self.transactions.add_many_atomic(transactions())
+            # id가 있으면 같은 id 거래를 교체(upsert)하고, 없으면 새 거래로 추가한다.
+            self.transactions.upsert_many_atomic(transactions)
         except (ValidationError, StorageError):
             raise
         except (OSError, UnicodeError, csv.Error) as error:
@@ -191,7 +190,7 @@ class LedgerService:
                 f"CSV 파일을 가져올 수 없습니다: {error}",
                 "파일 경로, 읽기 권한, UTF-8 인코딩과 CSV 형식을 확인해 주세요.",
             ) from error
-        return count
+        return len(transactions)
 
     @log_execution
     def export_csv(
@@ -245,6 +244,7 @@ class LedgerService:
                         continue
                     writer.writerow(
                         {
+                            "id": transaction.id,
                             "date": transaction.date,
                             "type": transaction.type,
                             "category": transaction.category,
@@ -280,8 +280,10 @@ class LedgerService:
     def _transaction_from_csv_row(self, row: dict[str, str | None]) -> Transaction:
         category = validate_name(row.get("category") or "")
         self._require_category(category)
+        raw_id = (row.get("id") or "").strip()
+        transaction_id = validate_name(raw_id, "거래 id") if raw_id else uuid4().hex
         return Transaction.create(
-            transaction_id=uuid4().hex,
+            transaction_id=transaction_id,
             date=row.get("date") or "",
             type=row.get("type") or "",
             category=category,

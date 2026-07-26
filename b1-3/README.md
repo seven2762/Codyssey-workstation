@@ -37,7 +37,7 @@ python3 -m budget_app --data-dir ./demo-data list --limit 10
 # 대화형 거래 추가
 python3 -m budget_app add
 
-# 최근 저장순 목록과 검색
+# 최근 저장순 목록과 검색 (--limit 0은 전체 출력)
 python3 -m budget_app list --limit 20
 python3 -m budget_app search --from 2026-07-01 --to 2026-07-31 \
   --category food --type expense --q lunch --tag work
@@ -102,9 +102,8 @@ data/
 요약과 카테고리 사용 여부 검사도 순방향 제너레이터로 한 건씩 처리한다.
 
 수정·삭제·예산·카테고리 변경은 같은 디렉터리에 임시 파일을 쓰고 `flush`와
-`fsync`를 마친 뒤 원본을 원자적으로 교체한다. CSV import도 먼저 모든 행을 검증해
-스풀 파일에 보관한 후 거래 파일을 한 번만 교체하므로, 중간 행이 잘못되면 일부만
-등록되는 일이 없다.
+`fsync`를 마친 뒤 원본을 원자적으로 교체한다. CSV import도 먼저 모든 행을 검증한
+뒤 거래 파일을 한 번만 교체하므로, 중간 행이 잘못되면 일부만 등록되는 일이 없다.
 
 ## import/export CSV 스키마
 
@@ -113,9 +112,12 @@ data/
 - 태그: 한 셀 안에서 쉼표로 구분. 태그가 여러 개면 CSV 규칙에 따라 셀을 큰따옴표로 감싼다.
 - import의 카테고리는 미리 등록되어 있어야 한다.
 - export는 `--month` 또는 `--from`과 `--to` 한 쌍 중 하나가 필수다.
+- export는 항상 `id`를 포함해 내보낸다. import는 `id`가 있으면 같은 id 거래를
+  교체(upsert)하고, 없으면 새 거래로 추가하므로 export→import 왕복이 멱등이다.
 
 | column | required | 설명 |
 | --- | --- | --- |
+| `id` | N | 있으면 upsert 키, 없으면 새 id 발급 |
 | `date` | Y | `YYYY-MM-DD` 실제 날짜 |
 | `type` | Y | `income` 또는 `expense` |
 | `category` | Y | 등록된 카테고리 |
@@ -123,7 +125,7 @@ data/
 | `memo` | N | 문자열 |
 | `tags` | N | 쉼표 구분 문자열 |
 
-예시:
+예시(직접 작성 시 `id`는 생략 가능):
 
 ```csv
 date,type,category,amount,memo,tags

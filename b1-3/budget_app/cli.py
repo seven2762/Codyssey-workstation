@@ -41,7 +41,9 @@ def build_parser() -> argparse.ArgumentParser:
     commands.add_parser("add", help="거래를 대화형으로 추가")
 
     list_parser = commands.add_parser("list", help="최신 거래 목록 조회")
-    list_parser.add_argument("--limit", type=int, default=20, help="출력할 최대 건수 (기본값: 20)")
+    list_parser.add_argument(
+        "--limit", type=int, default=20, help="출력할 최대 건수 (기본값: 20, 0은 전체)"
+    )
 
     search = commands.add_parser("search", help="조건으로 거래 검색")
     search.add_argument("--from", dest="date_from", metavar="YYYY-MM-DD")
