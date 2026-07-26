@@ -36,7 +36,7 @@ sqlite3 library.db < queries.sql
 ```mermaid
 erDiagram
     category  ||--o{ book   : "분류 1 : N 도서"
-    publisher ||--o{ book   : "출판사 1 : N 도서"
+    publisher |o--o{ book   : "출판사 0..1 : N 도서"
     member    ||--o{ rental : "회원 1 : N 대여"
     book      ||--o{ rental : "도서 1 : N 대여"
 
