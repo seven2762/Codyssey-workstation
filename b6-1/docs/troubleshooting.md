@@ -36,7 +36,7 @@ ec2-emfrntkf@15.165.74.3: Permission denied (publickey,gssapi-keyex,gssapi-with-
 한/영 입력 상태를 전환한 뒤 올바른 사용자명으로 재시도했다.
 
 ```bash
-ssh -i mission-key.pem ec2-user@15.165.74.3
+ssh -i cody-aws-key.pem ec2-user@15.165.74.3
 ```
 
 ### 결과
@@ -51,7 +51,7 @@ ssh -i mission-key.pem ec2-user@15.165.74.3
 Host cody-server
     HostName 15.165.74.3
     User ec2-user
-    IdentityFile ~/.ssh/mission-key.pem
+    IdentityFile ~/.ssh/cody-aws-key.pem
 ```
 
 이후 `ssh cody-server`만으로 접속할 수 있어 사용자명 오타 가능성이 제거된다.

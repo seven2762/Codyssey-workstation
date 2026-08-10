@@ -26,13 +26,13 @@ VPC로 격리된 네트워크를 직접 설계하고, EC2에 웹 서버를 배�
 
 | 구분 | 이름 / ID | 설정값 |
 | --- | --- | --- |
-| VPC | mission-vpc | `10.0.0.0/16` |
-| Public Subnet | mission-public-subnet | `10.0.1.0/24`, ap-northeast-2a, 퍼블릭 IP 자동 할당 ON |
-| Internet Gateway | mission-igw | VPC에 Attached |
-| Route Table | mission-public-rt | `10.0.0.0/16 → local`, `0.0.0.0/0 → igw` (Active), 서브넷 명시적 연결 |
+| VPC | codyssey / `vpc-0022a01e987ae669a` | `10.0.0.0/16` |
+| Public Subnet | cody-subnet | `10.0.1.0/24`, ap-northeast-2a, 퍼블릭 IP 자동 할당 ON |
+| Internet Gateway | cody-gateway | VPC에 Attached |
+| Route Table | cody-route | `10.0.0.0/16 → local`, `0.0.0.0/0 → igw` (Active), 서브넷 명시적 연결 |
 | EC2 | cody-server | t3.micro, Amazon Linux 2023, Private `10.0.1.224`, Public `15.165.74.3` |
 | 웹 서버 | Nginx 1.30.4 | active (running), 부팅 시 자동 시작 설정(`systemctl enable`) |
-| Security Group | mission-web-sg | 인바운드 TCP 22 (My IP), TCP 80 (0.0.0.0/0) |
+| Security Group | cody-web-sg | 인바운드 TCP 22 (My IP), TCP 80 (0.0.0.0/0) |
 | IAM 사용자 | cody-iam | AmazonEC2FullAccess |
 
 ### 라우팅 테이블을 별도로 생성한 이유
