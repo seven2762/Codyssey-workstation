@@ -51,11 +51,13 @@ class HashMapTest(unittest.TestCase):
         hash_map.put("one", 1)
         hash_map.put("two", 2)
         hash_map.put("three", 3)
+        hash_map.put("four", 4)
 
         self.assertEqual(hash_map.capacity, 8)
         self.assertEqual(hash_map.get("one"), 1)
         self.assertEqual(hash_map.get("two"), 2)
         self.assertEqual(hash_map.get("three"), 3)
+        self.assertEqual(hash_map.get("four"), 4)
 
 
 class MinHeapTest(unittest.TestCase):

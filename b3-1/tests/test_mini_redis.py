@@ -51,9 +51,24 @@ class MiniRedisCommandTest(unittest.TestCase):
         )
         self.assertEqual(redis.execute("EXISTS abc"), "(integer) 0")
 
+    def test_oversized_overwrite_preserves_existing_entry(self):
+        redis = MiniRedis()
+        redis.execute("CONFIG SET maxmemory 5")
+        redis.execute("SET key ok")
+
+        self.assertEqual(redis.execute("SET key value"), "(error) OOM command not allowed when used_memory > 'maxmemory'")
+        self.assertEqual(redis.execute("GET key"), '"ok"')
+
+    def test_zero_maxmemory_is_unlimited(self):
+        redis = MiniRedis()
+        redis.execute("CONFIG SET maxmemory 0")
+
+        self.assertEqual(redis.execute('SET a "very large value"'), "OK")
+        self.assertIn("maxmemory:0", redis.execute("INFO memory"))
+
     def test_memory_uses_utf8_byte_length(self):
         redis = MiniRedis()
-        redis.execute("CONFIG SET maxmemory 11")
+        redis.execute("CONFIG SET maxmemory 5")
 
         self.assertEqual(
             redis.execute("SET 키 값"),
@@ -81,6 +96,15 @@ class MiniRedisCommandTest(unittest.TestCase):
         self.assertEqual(redis.execute("GET short"), "(nil)")
         self.assertEqual(redis.execute("EXISTS short"), "(integer) 0")
         self.assertEqual(redis.execute("DBSIZE"), "(integer) 0")
+
+    def test_del_cleans_lru_ttl_and_memory_state(self):
+        redis = MiniRedis()
+        redis.execute("SET temporary value")
+        redis.execute("EXPIRE temporary 10")
+
+        self.assertEqual(redis.execute("DEL temporary"), "(integer) 1")
+        self.assertEqual(redis.execute("TTL temporary"), "(integer) -2")
+        self.assertIn("used_memory:0", redis.execute("INFO memory"))
 
     def test_error_messages_are_redis_style(self):
         redis = MiniRedis()
