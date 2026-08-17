@@ -1,0 +1,73 @@
+===================================================================================
+[monitor.sh] START 2026-07-13 21:43:04.734
+  pattern='agent-leak-app'  interval=1s  duration=50s(0=inf)
+  warn: CPU>80%, RSS>400MB   (%CPU=/proc 기반 순간값, 1코어=100%)
+-----------------------------------------------------------------------------------
+TIMESTAMP                 | PID    | STAT | %CPU   | RSS(MB)  | THREADS | ELAPSED
+-----------------------------------------------------------------------------------
+[monitor.sh] 관제 시작: PID=3803
+2026-07-13 21:43:05.230   | 3803   | SN   | -      | 25       | 1       | 0s
+        └ thread TID=3803 STAT=SN CPU=21.3% WCHAN=do_select
+2026-07-13 21:43:06.581   | 3803   | SN   | 0.0    | 25       | 1       | 1s
+        └ thread TID=3803 STAT=SN CPU=6.6% WCHAN=do_select
+2026-07-13 21:43:07.940   | 3803   | SN   | 0.7    | 25       | 1       | 3s
+        └ thread TID=3803 STAT=SN CPU=4.2% WCHAN=do_select
+2026-07-13 21:43:09.304   | 3803   | SN   | 0.0    | 25       | 1       | 4s
+        └ thread TID=3803 STAT=SN CPU=2.9% WCHAN=do_select
+2026-07-13 21:43:10.656   | 3803   | SN   | 0.7    | 25       | 1       | 5s
+        └ thread TID=3803 STAT=SN CPU=2.4% WCHAN=do_select
+2026-07-13 21:43:11.995   | 3803   | SN   | 0.0    | 25       | 1       | 7s
+        └ thread TID=3803 STAT=SN CPU=2.0% WCHAN=do_select
+2026-07-13 21:43:13.332   | 3803   | SN   | 0.7    | 25       | 1       | 8s
+        └ thread TID=3803 STAT=SN CPU=1.8% WCHAN=do_select
+2026-07-13 21:43:14.663   | 3803   | SN   | 0.0    | 25       | 1       | 9s
+        └ thread TID=3803 STAT=SN CPU=1.5% WCHAN=do_select
+2026-07-13 21:43:15.994   | 3803   | SN   | 0.0    | 25       | 1       | 11s
+        └ thread TID=3803 STAT=SN CPU=1.4% WCHAN=do_select
+2026-07-13 21:43:17.321   | 3803   | SN   | 1.5    | 25       | 1       | 12s
+        └ thread TID=3803 STAT=SN CPU=1.4% WCHAN=do_select
+2026-07-13 21:43:18.672   | 3803   | SN   | 0.0    | 25       | 1       | 13s
+        └ thread TID=3803 STAT=SN CPU=1.2% WCHAN=do_select
+2026-07-13 21:43:20.067   | 3803   | SN   | 1.4    | 25       | 1       | 15s
+        └ thread TID=3803 STAT=SN CPU=1.2% WCHAN=do_select
+2026-07-13 21:43:21.409   | 3803   | SN   | 0.0    | 25       | 1       | 16s
+        └ thread TID=3803 STAT=SN CPU=1.1% WCHAN=do_select
+2026-07-13 21:43:22.746   | 3803   | SN   | 1.5    | 25       | 1       | 17s
+        └ thread TID=3803 STAT=SN CPU=1.2% WCHAN=do_select
+2026-07-13 21:43:24.103   | 3803   | SN   | 0.0    | 25       | 1       | 19s
+        └ thread TID=3803 STAT=SN CPU=1.1% WCHAN=do_select
+2026-07-13 21:43:25.449   | 3803   | SN   | 0.0    | 25       | 1       | 20s
+        └ thread TID=3803 STAT=SN CPU=1.0% WCHAN=do_select
+2026-07-13 21:43:26.801   | 3803   | SN   | 1.5    | 25       | 1       | 21s
+        └ thread TID=3803 STAT=SN CPU=1.0% WCHAN=do_select
+2026-07-13 21:43:28.139   | 3803   | SN   | 0.0    | 25       | 1       | 23s
+        └ thread TID=3803 STAT=SN CPU=1.0% WCHAN=do_select
+2026-07-13 21:43:29.489   | 3803   | SN   | 2.2    | 25       | 1       | 24s
+        └ thread TID=3803 STAT=SN CPU=1.0% WCHAN=do_select
+2026-07-13 21:43:30.839   | 3803   | SN   | 0.0    | 25       | 1       | 25s
+        └ thread TID=3803 STAT=SN CPU=1.0% WCHAN=do_select
+2026-07-13 21:43:32.185   | 3803   | SN   | 2.2    | 25       | 1       | 27s
+        └ thread TID=3803 STAT=SN CPU=1.0% WCHAN=do_select
+2026-07-13 21:43:33.533   | 3803   | SN   | 0.0    | 25       | 1       | 28s
+        └ thread TID=3803 STAT=SN CPU=1.0% WCHAN=do_select
+2026-07-13 21:43:34.888   | 3803   | SN   | 0.0    | 25       | 1       | 30s
+        └ thread TID=3803 STAT=SN CPU=0.9% WCHAN=do_select
+2026-07-13 21:43:36.270   | 3803   | SN   | 2.2    | 25       | 1       | 31s
+        └ thread TID=3803 STAT=SN CPU=1.0% WCHAN=do_select
+2026-07-13 21:43:37.608   | 3803   | SN   | 0.0    | 25       | 1       | 32s
+        └ thread TID=3803 STAT=SN CPU=1.0% WCHAN=do_select
+2026-07-13 21:43:38.941   | 3803   | SN   | 3.0    | 25       | 1       | 34s
+        └ thread TID=3803 STAT=SN CPU=1.0% WCHAN=do_select
+2026-07-13 21:43:40.269   | 3803   | SN   | 0.0    | 25       | 1       | 35s
+        └ thread TID=3803 STAT=SN CPU=1.0% WCHAN=do_select
+2026-07-13 21:43:41.593   | 3803   | SN   | 3.8    | 25       | 1       | 36s
+        └ thread TID=3803 STAT=SN CPU=1.1% WCHAN=do_select
+2026-07-13 21:43:42.919   | 3803   | SN   | 0.0    | 25       | 1       | 38s
+        └ thread TID=3803 STAT=SN CPU=1.0% WCHAN=do_select
+2026-07-13 21:43:44.268   | 3803   | SN   | 0.0    | 25       | 1       | 39s
+        └ thread TID=3803 STAT=SN CPU=1.0% WCHAN=do_select
+[monitor.sh] 2026-07-13 21:43:45.471 PID=3803 프로세스 없음 (종료/소멸 추정). 대기 1/3
+[monitor.sh] 2026-07-13 21:43:46.634 PID=3803 프로세스 없음 (종료/소멸 추정). 대기 2/3
+[monitor.sh] 2026-07-13 21:43:47.809 PID=3803 프로세스 없음 (종료/소멸 추정). 대기 3/3
+[monitor.sh] 대상 프로세스가 사라졌습니다. 관제를 종료합니다.
+[monitor.sh] STOP 2026-07-13 21:43:47.856
