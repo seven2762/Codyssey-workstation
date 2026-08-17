@@ -1,0 +1,13 @@
+label=cpu_before
+started_at=2026-07-13T12:43:04Z
+MEMORY_LIMIT=512
+CPU_MAX_OCCUPY=90
+MULTI_THREAD_ENABLE=false
+max_seconds=50
+launcher_pid=3793
+monitor_pid=3796
+timed_out=false
+app_exit_code=143
+monitor_exit_code=0
+elapsed_seconds=39
+completed_at=2026-07-13T12:43:47Z
