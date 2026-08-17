@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+data/
+tests/
+/test.sh
+*.log
+.coverage-trace/
+demo-run/
