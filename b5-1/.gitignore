@@ -1,0 +1,4 @@
+# SQLite 데이터베이스 파일 — run.sh 로 매번 재생성되는 산출물
+*.db
+*.db-journal
+*.db-wal
