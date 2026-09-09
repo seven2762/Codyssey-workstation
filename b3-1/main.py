@@ -4,12 +4,12 @@ from mini_redis import MiniRedis
 
 
 def main():
-    """사용자 입력을 반복 실행하고 종료 명령 또는 EOF에서 끝낸다."""
+    """사용자 입력을 반복 실행하고 종료 명령, EOF, 인터럽트에서 끝낸다."""
     redis = MiniRedis()
     while True:
         try:
             command_line = input("mini-redis> ")
-        except EOFError:
+        except (EOFError, KeyboardInterrupt):
             print()
             break
         result = redis.execute(command_line)
