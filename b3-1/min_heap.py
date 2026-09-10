@@ -1,13 +1,11 @@
-"""직접 구현한 동적 배열을 저장소로 사용하는 최소 힙이다."""
-
-from dynamic_array import DynamicArray
+"""완전 이진 트리를 인덱스 배열로 표현한 최소 힙이다."""
 
 
 class MinHeap:
     """삽입·삭제는 O(log n), 최솟값 조회는 O(1)인 이진 최소 힙이다."""
 
     def __init__(self):
-        self._items = DynamicArray()
+        self._items = []
 
     def push(self, value):
         """값을 추가하고 부모 방향으로 정렬한다."""
@@ -21,7 +19,7 @@ class MinHeap:
         minimum = self._items[0]
         last = self._items.pop()
         if len(self._items) > 0:
-            self._items.set(0, last)
+            self._items[0] = last
             self._heapify_down(0)
         return minimum
 
@@ -61,8 +59,8 @@ class MinHeap:
     def _swap(self, first, second):
         """두 인덱스의 원소를 교환한다."""
         first_value = self._items[first]
-        self._items.set(first, self._items[second])
-        self._items.set(second, first_value)
+        self._items[first] = self._items[second]
+        self._items[second] = first_value
 
     def _less(self, first, second):
         """두 원소의 최소 힙 우선순위를 비교한다."""

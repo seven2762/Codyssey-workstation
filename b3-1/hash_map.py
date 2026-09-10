@@ -1,7 +1,6 @@
 """dict와 set 없이 체이닝 방식으로 구현한 해시맵이다."""
 
 from doubly_linked_list import DoublyLinkedList
-from dynamic_array import DynamicArray
 
 
 class _Entry:
@@ -64,8 +63,8 @@ class HashMap:
         return self._find_node(bucket, key) is not None
 
     def keys(self):
-        """모든 버킷을 순회해 키를 동적 배열에 담아 반환한다."""
-        result = DynamicArray()
+        """모든 버킷을 순회해 키를 배열에 담아 반환한다."""
+        result = []
         for bucket_index in range(self.capacity):
             bucket = self._buckets[bucket_index]
             node = bucket.peek_front()
@@ -95,7 +94,7 @@ class HashMap:
 
     def _new_buckets(self, capacity):
         """지정한 수만큼 빈 연결 리스트 버킷을 생성한다."""
-        buckets = DynamicArray(capacity)
+        buckets = []
         for _ in range(capacity):
             buckets.append(DoublyLinkedList())
         return buckets

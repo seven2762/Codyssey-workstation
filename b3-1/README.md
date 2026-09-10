@@ -45,7 +45,6 @@ mini-redis> TTL user:1
 
 ## 자료구조
 
-- `dynamic_array.py`: 용량 2배 확장 동적 배열
 - `doubly_linked_list.py`: 센티넬 노드 기반 O(1) 이중 연결 리스트
 - `hash_map.py`: 체이닝과 로드 팩터 0.75 기준 리해시를 사용하는 해시맵
 - `min_heap.py`: TTL 만료 시각을 빠르게 찾기 위한 최소 힙
@@ -56,9 +55,3 @@ mini-redis> TTL user:1
 - `mini_redis.py`: REPL이 사용하는 퍼사드
 
 TTL 힙은 덮어쓰기와 재설정으로 생긴 이전 레코드를 버전으로 판별하는 lazy deletion 방식을 사용합니다.
-
-## 테스트
-
-```bash
-python3 -m unittest discover -s tests -v
-```

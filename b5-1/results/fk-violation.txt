@@ -1,4 +1,0 @@
-# 존재하지 않는 member_id(999)로 대여를 시도하면 FK 제약이 막는다.
-$ INSERT INTO rental(member_id, book_id, ...) VALUES (999, 1, ...);
---- 결과 ---
-Error: stepping, FOREIGN KEY constraint failed (19)
