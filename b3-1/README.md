@@ -24,6 +24,8 @@ python3 main.py
 
 종료 명령은 `exit` 또는 `quit`입니다. 값에 공백이 포함되면 큰따옴표로 감쌀 수 있습니다.
 
+명령어별 실행 예시와 시연 순서는 [`DEMO.md`](DEMO.md)에 정리했습니다.
+
 ```text
 mini-redis> CONFIG SET maxmemory 30
 OK
