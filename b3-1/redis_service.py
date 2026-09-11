@@ -50,8 +50,9 @@ class RedisService:
         return self._cache_store.keys()
 
     def configure_maxmemory(self, maximum):
-        """최대 메모리 제한을 설정한다."""
+        """최대 메모리 제한을 설정하고, 현재 사용량이 넘치면 즉시 LRU 제거한다."""
         self._cache_store.set_maxmemory(maximum)
+        self._cache_store.evict_until_within_limit()
 
     def memory_info(self):
         """만료 키를 반영한 최신 메모리 통계를 반환한다."""
