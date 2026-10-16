@@ -83,6 +83,8 @@ main() {
         "OOM Before reproduces MemoryGuard termination"
     require_contains "$EVIDENCE_ROOT/oom_before/run.log" '^app_exit_code=137$' \
         "OOM Before exits by SIGKILL"
+    require_contains "$EVIDENCE_ROOT/oom_before/run.log" '^timed_out=false$' \
+        "OOM Before terminates before runner cleanup"
     require_contains "$EVIDENCE_ROOT/oom_after/app.log" 'MEMORY RECOVERED' \
         "OOM After recovers by flushing memory"
     require_contains "$EVIDENCE_ROOT/oom_after/run.log" '^timed_out=true$' \
@@ -92,6 +94,8 @@ main() {
         "CPU Before reproduces watchdog termination"
     require_contains "$EVIDENCE_ROOT/cpu_before/run.log" '^app_exit_code=143$' \
         "CPU Before exits by SIGTERM"
+    require_contains "$EVIDENCE_ROOT/cpu_before/run.log" '^timed_out=false$' \
+        "CPU Before terminates before runner cleanup"
     require_contains "$EVIDENCE_ROOT/cpu_after/app.log" 'Peak reached \(40\.00%\)' \
         "CPU After remains below the watchdog threshold"
     require_contains "$EVIDENCE_ROOT/cpu_after/run.log" '^timed_out=true$' \
@@ -107,6 +111,8 @@ main() {
         "Deadlock After disables concurrent workers"
     require_not_contains "$EVIDENCE_ROOT/deadlock_after/app.log" 'Status: BLOCKED' \
         "Deadlock After has no blocked worker evidence"
+    require_contains "$EVIDENCE_ROOT/deadlock_after/run.log" '^timed_out=true$' \
+        "Deadlock After remains alive through the observation window"
 
     require_contains "$EVIDENCE_ROOT/scheduling/app.log" 'Scenario Selected: \[Healthy System Monitoring\]' \
         "healthy settings select the scheduling scenario"
@@ -114,6 +120,7 @@ main() {
     printf '\n'
     if [ "$FAILURES" -eq 0 ]; then
         printf 'All b1-2 evidence checks passed.\n'
+        printf 'Scope: application scenario checks only; run tests/check_evidence.py for measured trends and OS CPU limitations.\n'
         exit 0
     fi
 

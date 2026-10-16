@@ -1,0 +1,23 @@
+2026-10-16T17:05:36+09:00
+Linux b1-2-agent 7.0.14-orbstack-00380-ga7e0a2dc9535 #1 SMP PREEMPT Fri Aug  7 03:48:40 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+PRETTY_NAME="Ubuntu 24.04.5 LTS"
+NAME="Ubuntu"
+VERSION_ID="24.04"
+VERSION="24.04.5 LTS (Noble Numbat)"
+VERSION_CODENAME=noble
+ID=ubuntu
+ID_LIKE=debian
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+UBUNTU_CODENAME=noble
+LOGO=ubuntu-logo
+uid=1000(agent) gid=1000(agent) groups=1000(agent)
+7e0a19cfa80ece6b547a5008273661f0d4d71e526e96b51e0d0f341dd1bb3e40  /home/agent/agent-app/bin/agent-leak-app
+drwxr-xr-x agent:agent /home/agent/agent-app/upload_files
+drwx------ agent:agent /home/agent/agent-app/api_keys
+-rw------- agent:agent /home/agent/agent-app/api_keys/secret.key
+drwxr-xr-x agent:agent /home/agent/agent-app/logs
+State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess
+LISTEN 0      1            0.0.0.0:15034      0.0.0.0:*    users:(("agent-leak-app",pid=10407,fd=4))

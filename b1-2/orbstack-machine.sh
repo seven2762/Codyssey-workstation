@@ -83,9 +83,25 @@ run_in_machine() {
 }
 
 run_provision() {
+    local staging_dir result=0
     start_machine
-    printf '[INFO] provisioning from OrbStack mount: %s\n' "$SCRIPT_DIR"
-    run_in_machine sudo bash "$SCRIPT_DIR/provision-orbstack.sh"
+    # Desktop 공유 마운트가 macOS 권한/파일 제공자 상태에 따라 멈출 수 있으므로
+    # 필요한 파일만 stdin으로 전송하여 VM의 로컬 파일시스템에서 실행한다.
+    staging_dir=$(run_in_machine mktemp -d /tmp/b1-2-provision.XXXXXX)
+    [[ "$staging_dir" =~ ^/tmp/b1-2-provision\.[A-Za-z0-9]+$ ]] || {
+        printf '[ERROR] invalid VM staging directory\n' >&2
+        return 1
+    }
+    printf '[INFO] staging runtime in VM: %s\n' "$staging_dir"
+    if COPYFILE_DISABLE=1 tar --no-xattrs -C "$SCRIPT_DIR" -cf - agent-leak-app-x86 monitor.sh run-scenario.sh \
+        run-all-scenarios.sh setup-agent-env.sh verify-results.sh verify-orbstack.sh \
+        provision-orbstack.sh | run_in_machine tar -C "$staging_dir" -xf -; then
+        run_in_machine sudo bash "$staging_dir/provision-orbstack.sh" || result=$?
+    else
+        result=1
+    fi
+    run_in_machine rm -rf -- "$staging_dir"
+    return "$result"
 }
 
 run_all() {

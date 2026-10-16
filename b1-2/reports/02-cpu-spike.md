@@ -1,153 +1,149 @@
-# [Bug] CPU Spike - CpuWorker 부하가 안전 임계(50%)를 초과하여 Watchdog이 SIGTERM으로 종료함
+# [Bug] CPU Latency - 앱 부하 임계 위반 후 SIGTERM 종료 및 상한 조정
 
-> 환경: OrbStack Ubuntu 24.04 (noble), amd64 / 실행 계정 `agent`(비루트)
-> 대상: `agent-leak-app` (포트 15034)
-> 증거 파일: [`evidence/cpu_before/`](../evidence/cpu_before/) · [`evidence/cpu_after/`](../evidence/cpu_after/)
-
----
+> 환경: OrbStack Ubuntu 24.04, Linux amd64 / 비루트 `agent`(uid=1000) / 포트 15034
+> 실행 시작(UTC): Before `2026-10-16T08:03:27Z`, After `2026-10-16T08:03:55Z`
+> 앱·관제 로그 시각은 게스트 현지 시각이며 `run.log`의 `Z` 시각은 UTC다.
+> Before: [app.log](../evidence/cpu_before/app.log) · [monitor.log](../evidence/cpu_before/monitor.log) · [run.log](../evidence/cpu_before/run.log) · [threads_snapshot.txt](../evidence/cpu_before/threads_snapshot.txt)
+> After: [app.log](../evidence/cpu_after/app.log) · [monitor.log](../evidence/cpu_after/monitor.log) · [run.log](../evidence/cpu_after/run.log) · [threads_snapshot.txt](../evidence/cpu_after/threads_snapshot.txt)
 
 ## 1. Description (현상 설명)
 
-- **어떤 현상이 발생했는가?**
-  특정 프로세스(`agent-leak-app`)의 `CpuWorker`가 처리 부하를 점진적으로 끌어올린다.
-  부하가 애플리케이션의 **안전 임계치(약 50%)** 를 넘어서는 순간, 과점유 방지 정책
-  (**Watchdog / CpuWorker Threshold Check**)이 발동하여 프로세스가 종료된다.
-  이는 오류(Exception)에 의한 비정상 종료가 아니라 **시스템 보호를 위한 계획된 조치**이다.
+`MEMORY_LIMIT=512`, `MULTI_THREAD_ENABLE=false`를 고정하고 `CPU_MAX_OCCUPY=90`에서
+앱의 `Current Load`가 증가한 뒤 `CPU Threshold Violated!`와 함께 종료됐다.
+`CPU_MAX_OCCUPY=40`에서는 cooldown에 도달하고 관측 종료까지 생존했다.
 
-- **언제, 어떤 조건에서 발생했는가?**
-  - `MULTI_THREAD_ENABLE=false`, `MEMORY_LIMIT=512`(메모리는 안전 범위로 고정하여 변수 격리)
-  - `CPU_MAX_OCCUPY`가 안전 임계(50%)를 **초과**하도록 설정된 경우(예: 90)
-  - 부팅 배너에서 다음 경고가 표시된다:
-    ```
-    [ CPU ] Limit: 90%     [ WARNING: Recommend Under 50% ]
-    ```
+**검증 한계:** 앱 내부 부하 지표의 상승은 확인했으나 OS 실측 CPU 과점유 및 실제 요청
+지연은 입증되지 않았다. 이 보고서는 보호 정책 재현 결과이며 CPU 급상승 필수 증거의
+완전 충족으로 판정하지 않는다.
 
----
+```bash
+# VM 내 agent 계정에서 실행, 필수 경로·키는 setup-agent-env.sh로 구성
+cd /home/agent/agent-app
+bin/run-scenario.sh cpu_before 512 90 false 50
+bin/run-scenario.sh cpu_after 512 40 false 45
+```
 
 ## 2. Evidence & Logs (증거 자료)
 
-### 2-1. 프로그램 실행 로그 — CPU 부하 급상승 구간과 종료 (`evidence/cpu_before/app.log`)
+Before 앱 로그(원본 발췌):
 
 ```text
-2026-07-07 17:55:29 [INFO] [CpuWorker] Started. Maximum CPU Limit: 90%
-2026-07-07 17:55:29 [INFO] [CpuWorker] Current Load: 5.00%
-2026-07-07 17:55:35 [INFO] [CpuWorker] Current Load: 8.30%
-2026-07-07 17:55:38 [INFO] [CpuWorker] Current Load: 16.66%
-2026-07-07 17:55:41 [INFO] [CpuWorker] Current Load: 25.12%
-2026-07-07 17:55:48 [INFO] [CpuWorker] Current Load: 37.84%
-2026-07-07 17:55:54 [INFO] [CpuWorker] Current Load: 43.43%
-2026-07-07 17:55:57 [INFO] [CpuWorker] Current Load: 47.59%
-2026-07-07 17:56:00 [INFO] [CpuWorker] Current Load: 52.11%
-2026-07-07 17:56:00 [CRITICAL] [CpuWorker] CPU Threshold Violated! (52.11%).
+2026-10-16 17:03:30,036 [INFO] [CpuWorker] Started. Maximum CPU Limit: 90%
+2026-10-16 17:03:30,038 [INFO] [CpuWorker] Current Load: 5.00%
+2026-10-16 17:03:33,167 [INFO] [CpuWorker] Current Load: 14.64%
+2026-10-16 17:03:36,297 [INFO] [CpuWorker] Current Load: 20.99%
+2026-10-16 17:03:39,422 [INFO] [CpuWorker] Current Load: 26.71%
+2026-10-16 17:03:42,546 [INFO] [CpuWorker] Current Load: 35.30%
+2026-10-16 17:03:45,672 [INFO] [CpuWorker] Current Load: 41.51%
+2026-10-16 17:03:48,799 [INFO] [CpuWorker] Current Load: 48.52%
+2026-10-16 17:03:51,930 [INFO] [CpuWorker] Current Load: 55.65%
+2026-10-16 17:03:52,031 [CRITICAL] [CpuWorker] CPU Threshold Violated! (55.65%).
 ```
 
-핵심 로그: **`Current Load`가 5% → 52.11%로 급상승** 후 **`CPU Threshold Violated! (52.11%)`**.
-부하가 50%를 넘긴 직후 위반이 선언되었다.
-
-### 2-2. monitor.sh 관제 로그 — 종료 시점 포착 (`evidence/cpu_before/monitor.log`)
+OS `monitor.sh` 관측(시각 / PID / STAT / %CPU / RSS(MB) / 스레드 / 경과):
 
 ```text
-TIMESTAMP                 | PID    | STAT | %CPU   | RSS(MB)  | THREADS | ELAPSED
-2026-07-07 17:55:30.420   | 13171  | SN   | 0.8    | 25       | 1       | 3s
-...
-2026-07-07 17:56:00.500   | 13171  | SN   | 0.0    | 25       | 1       | 33s
-[monitor.sh] 2026-07-07 17:56:01 PID=13171 프로세스 없음 (종료/소멸 추정). 대기 1/3
-[monitor.sh] 2026-07-07 17:56:04 대상 프로세스가 사라졌습니다. 관제를 종료합니다.
+2026-10-16 17:03:28.321   | 7191   | SN   | -      | 25       | 1       | 0s
+2026-10-16 17:03:33.301   | 7191   | RN   | 1.6    | 25       | 1       | 5s
+2026-10-16 17:03:38.286   | 7191   | SN   | 0.0    | 25       | 1       | 10s
+2026-10-16 17:03:43.282   | 7191   | SN   | 2.4    | 25       | 1       | 15s
+2026-10-16 17:03:48.256   | 7191   | SN   | 0.0    | 25       | 1       | 20s
+2026-10-16 17:03:52.017   | 7191   | SN   | 4.0    | 25       | 1       | 23s
 ```
 
-관제는 프로세스가 살아있다가 **약 33초 시점에 소멸**했음을 포착한다(RSS는 25MB로
-일정 → 메모리가 아닌 CPU가 종료 원인임을 교차 확인).
-
-### 2-3. 프로세스 종료 코드
+앱 내부 최고 `Current Load`는 **55.65%**, OS 순간 CPU 최고는
+**4%**(1코어=100%)다. 두 지표는 동일하지 않다.
+원본 관제의 스레드 행은 `ps -L` 출력 기반이며 프로세스 행의 순간 CPU와 산정 구간도 다르다.
 
 ```text
-[run-scenario] app exit code: 143 (elapsed 33s)   # 143 = 128 + 15(SIGTERM)
+label=cpu_before
+started_at=2026-10-16T08:03:27Z
+MEMORY_LIMIT=512
+CPU_MAX_OCCUPY=90
+MULTI_THREAD_ENABLE=false
+max_seconds=50
+launcher_pid=7181
+monitor_pid=7184
+timed_out=false
+app_exit_code=143
+monitor_exit_code=0
+elapsed_seconds=24
+completed_at=2026-10-16T08:03:55Z
 ```
 
-종료 코드 **143**은 `SIGTERM(15)`에 의한 종료다. OOM 사례의 `SIGKILL(137)`과 달리,
-Watchdog이 **정상 종료 신호(SIGTERM)** 를 보내 우아하게 내렸음을 의미한다.
-(내부 `timeout`은 50초였고 실제 종료는 33초이므로, 이는 앱 자체 Watchdog의 종료다.)
-
-### 2-4. 참고 — 앱 내부 부하 지표 vs OS 실측 CPU
-`app.log`의 `Current Load`(→52%)는 **앱이 자체 산정하는 논리적 부하 지표**이며,
-Watchdog의 종료 판단 기준이다. 반면 `monitor.log`의 `%CPU`(=/proc 델타 기반 OS
-실측, 1코어=100%)는 0~4% 수준으로 낮다. 즉 이 앱은 실제 코어를 100% 점유하는 대신
-**부하를 내부적으로 모델링**하고, 그 지표로 자기보호를 수행한다. 두 관점을 함께
-제시하여 "무엇을 기준으로 종료가 일어났는지"를 명확히 한다.
-
----
+원본에는 `CPU Threshold Violated!`가 있으나 명시적인 `WATCHDOG … SIGTERM` 문구는 없다.
+로그에 없는 문구를 증거로 추가하지 않았다.
 
 ## 3. Root Cause Analysis (원인 분석)
 
-### 기술적 원인
-- `CpuWorker`는 시작 시 `CPU_MAX_OCCUPY`를 **목표 상한**으로 삼아 부하를 점진적으로
-  끌어올린다.
-- 애플리케이션에는 별도의 **고정 안전 임계치(약 50%, 배너의 `Recommend Under 50%`)** 가
-  존재한다. `CPU_MAX_OCCUPY`가 이 임계보다 크게 설정되면, 부하가 상승하다 50%를
-  통과하는 순간 **Watchdog이 `CPU Threshold Violated`를 선언하고 SIGTERM으로 종료**한다.
-- 반대로 `CPU_MAX_OCCUPY`가 임계 이하이면, 부하는 목표치에서 `Peak reached → cooldown`
-  으로 진동할 뿐 임계를 넘지 않아 종료가 발생하지 않는다(4장 After 참조).
-
-### 관련 OS 동작 원리
-- 한 프로세스가 CPU를 과점유하면, 동일 코어를 공유하는 다른 프로세스의 **스케줄링
-  지연(run queue 대기)** 이 커져 시스템 전체 응답성이 저하된다. Watchdog은 이런
-  **시스템 지연 유발을 예방**하기 위한 장치다.
-- `SIGTERM`은 프로세스가 정리 후 종료할 수 있는 **정상 종료 신호**이고, `SIGKILL`은
-  즉시 강제 종료다. 본 사례가 143(SIGTERM)인 점은 "오류가 아닌 통제된 보호 조치"임을
-  코드 레벨에서 뒷받침한다.
-
----
+- 관측 사실: 권장 상한 배너는 50%이고, 앱 내부 지표가 50%를 넘은 직후 임계 위반이
+  기록됐다. 관측 시간 만료 전(`timed_out=false`) 종료 코드 143(128+15)이 발생했다.
+- 추론: 앱의 과점유 방지 정책(미션에서 Watchdog으로 지칭)에 따른 SIGTERM 종료와
+  부합한다. 종료 코드는 종료 신호와 부합하는 정보이며 발신 주체, 별도 감시 스레드,
+  종료 핸들러 실행·정상 정리 완료를 단독으로 증명하지 않는다.
+- OS 원리: 실제 CPU 경합이 발생하면 다른 실행 가능 작업의 대기 시간이 길어져
+  응답 지연을 유발할 수 있다. 본 실행에서는 이를 입증할 CPU 급상승·지연 측정이 없다.
+- 앱 내부 지표와 OS 실측의 차이는 재현 가능한 관측 사실이다. 내부 지표가 시뮬레이션인지,
+  어떤 공식으로 산정되는지는 블랙박스 로그만으로 확정하지 않는다.
 
 ## 4. Workaround & Verification (조치 및 검증)
 
-### 조치: 환경변수 `CPU_MAX_OCCUPY` 하향 (임계 초과 → 임계 이하)
-
-```bash
-# Before
-CPU_MAX_OCCUPY=90 MEMORY_LIMIT=512 MULTI_THREAD_ENABLE=false  ./agent-leak-app
-# After
-CPU_MAX_OCCUPY=40 MEMORY_LIMIT=512 MULTI_THREAD_ENABLE=false  ./agent-leak-app
-```
-
-### After 결과 — 임계 미달로 종료 없이 생존 (`evidence/cpu_after/app.log`)
+`CPU_MAX_OCCUPY`만 90→40으로 낮췄다. After에서는 Healthy 시나리오로 전환되며,
+아래 로그처럼 목표 부하에 도달한 뒤 cooldown으로 내려간다.
 
 ```text
-2026-07-07 17:56:07 [INFO] [CpuWorker] Started. Maximum CPU Limit: 40%
-2026-07-07 17:56:26 [INFO] [CpuWorker] Current Load: 31.59%
-2026-07-07 17:56:32 [INFO] [CpuWorker] Current Load: 36.66%
-2026-07-07 17:56:34 [INFO] [CpuWorker] Peak reached (40.00%). Starting cooldown...
-2026-07-07 17:56:35 [INFO] [CpuWorker] Current Load: 40.00%
-2026-07-07 17:56:38 [INFO] [CpuWorker] Current Load: 35.57%
-2026-07-07 17:56:41 [INFO] [CpuWorker] Current Load: 27.42%
-2026-07-07 17:56:48 [INFO] [CpuWorker] Current Load: 15.52%   # 종료 없이 계속 동작
+2026-10-16 17:03:57,918 [INFO] >>> Scenario Selected: [Healthy System Monitoring]
+2026-10-16 17:03:58,742 [INFO] [CpuWorker] Current Load: 5.00%
+2026-10-16 17:04:01,869 [INFO] [CpuWorker] Current Load: 12.17%
+2026-10-16 17:04:04,996 [INFO] [CpuWorker] Current Load: 20.21%
+2026-10-16 17:04:08,122 [INFO] [CpuWorker] Current Load: 22.23%
+2026-10-16 17:04:11,247 [INFO] [CpuWorker] Current Load: 27.61%
+2026-10-16 17:04:14,375 [INFO] [CpuWorker] Current Load: 29.42%
+2026-10-16 17:04:17,503 [INFO] [CpuWorker] Current Load: 31.04%
+2026-10-16 17:04:20,632 [INFO] [CpuWorker] Current Load: 32.22%
+2026-10-16 17:04:23,763 [INFO] [CpuWorker] Current Load: 37.81%
+2026-10-16 17:04:25,881 [INFO] [CpuWorker] Peak reached (40.00%). Starting cooldown...
+2026-10-16 17:04:26,891 [INFO] [CpuWorker] Current Load: 40.00%
+2026-10-16 17:04:30,014 [INFO] [CpuWorker] Current Load: 32.48%
+2026-10-16 17:04:33,142 [INFO] [CpuWorker] Current Load: 29.67%
+2026-10-16 17:04:36,268 [INFO] [CpuWorker] Current Load: 27.54%
+2026-10-16 17:04:39,397 [INFO] [CpuWorker] Current Load: 22.28%
 ```
 
-부하가 목표치 40%에서 `Peak reached → cooldown`으로 **진동**하며 50% 임계를 넘지
-않는다. 프로세스는 관측 시간 내내 **종료되지 않았다**.
-
-### Before & After 비교
-
-| 항목 | Before (`CPU_MAX_OCCUPY=90`) | After (`CPU_MAX_OCCUPY=40`) |
+| 항목 | Before | After |
 | --- | --- | --- |
-| 부팅 배너 | `WARNING: Recommend Under 50%` | `[ OK ]` |
-| 최고 부하 | 52.11% (임계 **초과**) | 40.00% (임계 **이하**) |
-| Watchdog | `CPU Threshold Violated!` → 종료 | 미발동 (`cooldown` 반복) |
-| 종료 코드 | **143 (SIGTERM)** | 미종료 (생존) |
-| 생존 시간 | 약 **33초** | 관측 시간 내내 **지속** |
+| CPU_MAX_OCCUPY | 90% | 40% |
+| 관측 경과 | 24초 | 45초 |
+| 앱 종료 코드 | 143 | 143 |
+| 관측 종료 후 정리(`timed_out`) | false | true |
+| 앱 Current Load 최고 | 55.65% | 40.00% |
+| OS 순간 CPU 최고 | 4% | 4% |
+| 결과 | 임계 위반 후 종료 | cooldown, 관측 구간 생존 |
 
-### 근본적 해결을 위한 추가 제안 (선택)
-- 위 조치는 임시 방편이다. 실제 운영에서는 **CpuWorker의 부하 상승 로직 자체를
-  프로파일링**하여, 왜 부하가 무한정 상승하는지(작업 폭주/비효율 루프)를 규명해야 한다.
-- 상한을 낮추는 것은 처리량을 희생하므로, 근본적으로는 작업을 **비동기 큐/레이트
-  리미팅**으로 평탄화하거나 코어를 증설하여 임계 초과 없이 목표 처리량을 확보하는
-  방향이 바람직하다.
+After의 종료 코드 143은 관측 만료 후 스크립트가 정리한 결과다.
 
----
+검증: `python3 tests/check_evidence.py`는 보호 정책과 실측을 분리해 확인한다.
+`--strict-cpu`는 OS 실측 50% 이상을 추가 요구한다(50%는 이 저장소에서 정한 명시적
+판정 기준이며 미션 원문이 정한 수치는 아니다). 기준 미달 시 실패를 유지한다.
+다음 단계는 제공자에게 내부 지표 정의·실부하 재현 조건을 확인하는 것이다.
+별도 부하 프로그램으로 CPU를 올려 대상 앱의 증거로 대신하지 않는다.
 
-### 재현 방법 (Reproducibility)
+### 독립 OS 관측
 
-```bash
-cd /home/agent/agent-app
-bin/run-scenario.sh cpu_before 512 90 false 50   # 임계 초과 → SIGTERM
-bin/run-scenario.sh cpu_after  512 40 false 45   # 임계 이하 → 생존
+별도 명령으로 수집한 [ps -L 원본](../evidence/cpu_before/os_ps.log).
+앱 내부 지표와 별개로 대상 워커의 CPU·RSS·대기 상태를 확인했다.
+
+```text
+2026-10-16T17:03:29+09:00
+Linux b1-2-agent 7.0.14-orbstack-00380-ga7e0a2dc9535 #1 SMP PREEMPT Fri Aug  7 03:48:40 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+launcher_pid=7181 worker_pid=7191
+2026-10-16T17:03:29+09:00
+    PID    PPID     TID STAT %CPU %MEM   RSS WCHAN                    CMD
+   7191    7181    7191 SN    5.1  0.2 25836 do_select                /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
+2026-10-16T17:03:30+09:00
+    PID    PPID     TID STAT %CPU %MEM   RSS WCHAN                    CMD
+   7191    7181    7191 SN    1.2  0.2 25980 do_select                /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
+2026-10-16T17:03:51+09:00
+    PID    PPID     TID STAT %CPU %MEM   RSS WCHAN                    CMD
+   7191    7181    7191 RN    1.2  0.2 25980 -                        /home/agent/agent-app/bin/agent-leak-app /home/agent/agent-app/bin/agent-leak-app
 ```

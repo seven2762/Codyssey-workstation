@@ -1,0 +1,446 @@
+[INFO] machine already exists: b1-2-agent
+[INFO] starting machine: b1-2-agent
+[INFO] staging runtime in VM: /tmp/b1-2-provision.eIvIB4
+tar: Ignoring unknown extended header keyword 'LIBARCHIVE.xattr.com.apple.provenance'
+tar: Ignoring unknown extended header keyword 'LIBARCHIVE.xattr.com.apple.provenance'
+tar: Ignoring unknown extended header keyword 'LIBARCHIVE.xattr.com.apple.provenance'
+tar: Ignoring unknown extended header keyword 'LIBARCHIVE.xattr.com.apple.provenance'
+tar: Ignoring unknown extended header keyword 'LIBARCHIVE.xattr.com.apple.provenance'
+tar: Ignoring unknown extended header keyword 'LIBARCHIVE.xattr.com.apple.provenance'
+tar: Ignoring unknown extended header keyword 'LIBARCHIVE.xattr.com.apple.provenance'
+tar: Ignoring unknown extended header keyword 'LIBARCHIVE.xattr.com.apple.provenance'
+[provision] installing required Ubuntu packages
+Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease
+Hit:2 http://archive.ubuntu.com/ubuntu noble-updates InRelease
+Hit:3 http://security.ubuntu.com/ubuntu noble-security InRelease
+Reading package lists...
+Reading package lists...
+Building dependency tree...
+Reading state information...
+procps is already the newest version (2:4.0.4-4ubuntu3.3).
+coreutils is already the newest version (9.4-3ubuntu6.3).
+util-linux is already the newest version (2.39.3-9ubuntu6.6).
+sudo is already the newest version (1.9.15p5-3ubuntu5.24.04.4).
+ca-certificates is already the newest version (20260601~24.04.1).
+The following additional packages will be installed:
+  libmagic-mgc libmagic1t64 libmpfr6 libsigsegv2
+Suggested packages:
+  gawk-doc
+The following NEW packages will be installed:
+  file gawk libmagic-mgc libmagic1t64 libmpfr6 libsigsegv2
+0 upgraded, 6 newly installed, 0 to remove and 14 not upgraded.
+Need to get 1248 kB of archives.
+After this operation, 11.9 MB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 libmpfr6 amd64 4.2.1-1build1.1 [353 kB]
+Get:2 http://archive.ubuntu.com/ubuntu noble/main amd64 libsigsegv2 amd64 2.14-1ubuntu2 [15.0 kB]
+Get:3 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 gawk amd64 1:5.2.1-2ubuntu0.1 [463 kB]
+Get:4 http://archive.ubuntu.com/ubuntu noble/main amd64 libmagic-mgc amd64 1:5.45-3build1 [307 kB]
+Get:5 http://archive.ubuntu.com/ubuntu noble/main amd64 libmagic1t64 amd64 1:5.45-3build1 [87.2 kB]
+Get:6 http://archive.ubuntu.com/ubuntu noble/main amd64 file amd64 1:5.45-3build1 [22.0 kB]
+Fetched 1248 kB in 2s (545 kB/s)
+Selecting previously unselected package libmpfr6:amd64.
+(Reading database ...
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 16320 files and directories currently installed.)
+Preparing to unpack .../libmpfr6_4.2.1-1build1.1_amd64.deb ...
+Unpacking libmpfr6:amd64 (4.2.1-1build1.1) ...
+Selecting previously unselected package libsigsegv2:amd64.
+Preparing to unpack .../libsigsegv2_2.14-1ubuntu2_amd64.deb ...
+Unpacking libsigsegv2:amd64 (2.14-1ubuntu2) ...
+Setting up libmpfr6:amd64 (4.2.1-1build1.1) ...
+Setting up libsigsegv2:amd64 (2.14-1ubuntu2) ...
+Selecting previously unselected package gawk.
+(Reading database ...
+(Reading database ... 5%
+(Reading database ... 10%
+(Reading database ... 15%
+(Reading database ... 20%
+(Reading database ... 25%
+(Reading database ... 30%
+(Reading database ... 35%
+(Reading database ... 40%
+(Reading database ... 45%
+(Reading database ... 50%
+(Reading database ... 55%
+(Reading database ... 60%
+(Reading database ... 65%
+(Reading database ... 70%
+(Reading database ... 75%
+(Reading database ... 80%
+(Reading database ... 85%
+(Reading database ... 90%
+(Reading database ... 95%
+(Reading database ... 100%
+(Reading database ... 16337 files and directories currently installed.)
+Preparing to unpack .../gawk_1%3a5.2.1-2ubuntu0.1_amd64.deb ...
+Unpacking gawk (1:5.2.1-2ubuntu0.1) ...
+Selecting previously unselected package libmagic-mgc.
+Preparing to unpack .../libmagic-mgc_1%3a5.45-3build1_amd64.deb ...
+Unpacking libmagic-mgc (1:5.45-3build1) ...
+Selecting previously unselected package libmagic1t64:amd64.
+Preparing to unpack .../libmagic1t64_1%3a5.45-3build1_amd64.deb ...
+Unpacking libmagic1t64:amd64 (1:5.45-3build1) ...
+Selecting previously unselected package file.
+Preparing to unpack .../file_1%3a5.45-3build1_amd64.deb ...
+Unpacking file (1:5.45-3build1) ...
+Setting up libmagic-mgc (1:5.45-3build1) ...
+Setting up gawk (1:5.2.1-2ubuntu0.1) ...
+Setting up libmagic1t64:amd64 (1:5.45-3build1) ...
+Setting up file (1:5.45-3build1) ...
+Processing triggers for libc-bin (2.39-0ubuntu8.9) ...
+[provision] creating service user: agent(uid=1000)
+[provision] installing runtime into /home/agent/agent-app
+[provision] configuring reproducible agent environment
+[setup-agent-env] created key file: /home/agent/agent-app/api_keys/secret.key
+[setup-agent-env] environment ready
+  AGENT_HOME=/home/agent/agent-app
+  AGENT_PORT=15034
+  ENV_FILE=/home/agent/agent-app/.env
+  load with: source /home/agent/agent-app/.env
+
+========================================
+  b1-2 OrbStack VM provisioning complete
+========================================
+machine arch : x86_64
+service user : agent (uid=1000)
+agent home   : /home/agent/agent-app
+
+Run all scenarios:
+  sudo -u agent -H env AGENT_HOME=/home/agent/agent-app /home/agent/agent-app/bin/run-all-scenarios.sh
+
+Verify environment and evidence:
+  sudo b1-2-verify
+[INFO] machine already exists: b1-2-agent
+[INFO] starting machine: b1-2-agent
+[INFO] running all b1-2 scenarios
+
+==================================================================
+[run-all] oom_before (memory=128 cpu=50 multithread=false seconds=40)
+==================================================================
+label=oom_before
+started_at=2026-10-16T08:01:48Z
+MEMORY_LIMIT=128
+CPU_MAX_OCCUPY=50
+MULTI_THREAD_ENABLE=false
+max_seconds=40
+launcher_pid=4451
+monitor_pid=4454
+/home/agent/agent-app/bin/run-scenario.sh: line 128:  4451 Killed                  "$APP_BIN" > "$APP_LOG" 2>&1
+timed_out=false
+app_exit_code=137
+monitor_exit_code=0
+elapsed_seconds=17
+completed_at=2026-10-16T08:02:08Z
+[run-scenario] collected: /home/agent/agent-app/evidence/oom_before
+
+==================================================================
+[run-all] oom_after (memory=512 cpu=50 multithread=false seconds=75)
+==================================================================
+label=oom_after
+started_at=2026-10-16T08:02:08Z
+MEMORY_LIMIT=512
+CPU_MAX_OCCUPY=50
+MULTI_THREAD_ENABLE=false
+max_seconds=75
+launcher_pid=5007
+monitor_pid=5010
+timed_out=true
+app_exit_code=143
+monitor_exit_code=0
+elapsed_seconds=75
+completed_at=2026-10-16T08:03:27Z
+[run-scenario] collected: /home/agent/agent-app/evidence/oom_after
+
+==================================================================
+[run-all] cpu_before (memory=512 cpu=90 multithread=false seconds=50)
+==================================================================
+label=cpu_before
+started_at=2026-10-16T08:03:27Z
+MEMORY_LIMIT=512
+CPU_MAX_OCCUPY=90
+MULTI_THREAD_ENABLE=false
+max_seconds=50
+launcher_pid=7181
+monitor_pid=7184
+timed_out=false
+app_exit_code=143
+monitor_exit_code=0
+elapsed_seconds=24
+completed_at=2026-10-16T08:03:55Z
+[run-scenario] collected: /home/agent/agent-app/evidence/cpu_before
+
+==================================================================
+[run-all] cpu_after (memory=512 cpu=40 multithread=false seconds=45)
+==================================================================
+label=cpu_after
+started_at=2026-10-16T08:03:55Z
+MEMORY_LIMIT=512
+CPU_MAX_OCCUPY=40
+MULTI_THREAD_ENABLE=false
+max_seconds=45
+launcher_pid=8001
+monitor_pid=8004
+timed_out=true
+app_exit_code=143
+monitor_exit_code=0
+elapsed_seconds=45
+completed_at=2026-10-16T08:04:44Z
+[run-scenario] collected: /home/agent/agent-app/evidence/cpu_after
+
+==================================================================
+[run-all] deadlock_before (memory=512 cpu=50 multithread=true seconds=35)
+==================================================================
+label=deadlock_before
+started_at=2026-10-16T08:04:44Z
+MEMORY_LIMIT=512
+CPU_MAX_OCCUPY=50
+MULTI_THREAD_ENABLE=true
+max_seconds=35
+launcher_pid=9333
+monitor_pid=9336
+timed_out=true
+app_exit_code=143
+monitor_exit_code=0
+elapsed_seconds=35
+completed_at=2026-10-16T08:05:22Z
+[run-scenario] collected: /home/agent/agent-app/evidence/deadlock_before
+
+==================================================================
+[run-all] deadlock_after (memory=512 cpu=50 multithread=false seconds=35)
+==================================================================
+label=deadlock_after
+started_at=2026-10-16T08:05:22Z
+MEMORY_LIMIT=512
+CPU_MAX_OCCUPY=50
+MULTI_THREAD_ENABLE=false
+max_seconds=35
+launcher_pid=10397
+monitor_pid=10400
+timed_out=true
+app_exit_code=143
+monitor_exit_code=0
+elapsed_seconds=35
+completed_at=2026-10-16T08:06:00Z
+[run-scenario] collected: /home/agent/agent-app/evidence/deadlock_after
+
+==================================================================
+[run-all] scheduling (memory=512 cpu=10 multithread=false seconds=35)
+==================================================================
+label=scheduling
+started_at=2026-10-16T08:06:00Z
+MEMORY_LIMIT=512
+CPU_MAX_OCCUPY=10
+MULTI_THREAD_ENABLE=false
+max_seconds=35
+launcher_pid=11452
+monitor_pid=11455
+timed_out=true
+app_exit_code=143
+monitor_exit_code=0
+elapsed_seconds=35
+completed_at=2026-10-16T08:06:39Z
+[run-scenario] collected: /home/agent/agent-app/evidence/scheduling
+
+[run-all] validating collected evidence
+[PASS] oom_before application log
+[PASS] oom_before monitor log
+[PASS] oom_before runner metadata
+[PASS] oom_before boot checks
+[PASS] oom_before ready state
+[PASS] oom_after application log
+[PASS] oom_after monitor log
+[PASS] oom_after runner metadata
+[PASS] oom_after boot checks
+[PASS] oom_after ready state
+[PASS] cpu_before application log
+[PASS] cpu_before monitor log
+[PASS] cpu_before runner metadata
+[PASS] cpu_before boot checks
+[PASS] cpu_before ready state
+[PASS] cpu_after application log
+[PASS] cpu_after monitor log
+[PASS] cpu_after runner metadata
+[PASS] cpu_after boot checks
+[PASS] cpu_after ready state
+[PASS] deadlock_before application log
+[PASS] deadlock_before monitor log
+[PASS] deadlock_before runner metadata
+[PASS] deadlock_before boot checks
+[PASS] deadlock_before ready state
+[PASS] deadlock_after application log
+[PASS] deadlock_after monitor log
+[PASS] deadlock_after runner metadata
+[PASS] deadlock_after boot checks
+[PASS] deadlock_after ready state
+[PASS] scheduling application log
+[PASS] scheduling monitor log
+[PASS] scheduling runner metadata
+[PASS] scheduling boot checks
+[PASS] scheduling ready state
+[PASS] oom_before memory configuration
+[PASS] oom_before CPU configuration
+[PASS] oom_before concurrency configuration
+[PASS] oom_after memory configuration
+[PASS] oom_after CPU configuration
+[PASS] oom_after concurrency configuration
+[PASS] cpu_before memory configuration
+[PASS] cpu_before CPU configuration
+[PASS] cpu_before concurrency configuration
+[PASS] cpu_after memory configuration
+[PASS] cpu_after CPU configuration
+[PASS] cpu_after concurrency configuration
+[PASS] deadlock_before memory configuration
+[PASS] deadlock_before CPU configuration
+[PASS] deadlock_before concurrency configuration
+[PASS] deadlock_after memory configuration
+[PASS] deadlock_after CPU configuration
+[PASS] deadlock_after concurrency configuration
+[PASS] scheduling memory configuration
+[PASS] scheduling CPU configuration
+[PASS] scheduling concurrency configuration
+[PASS] OOM Before reproduces MemoryGuard termination
+[PASS] OOM Before exits by SIGKILL
+[PASS] OOM After recovers by flushing memory
+[PASS] OOM After remains alive for the observation window
+[PASS] CPU Before reproduces watchdog termination
+[PASS] CPU Before exits by SIGTERM
+[PASS] CPU After remains below the watchdog threshold
+[PASS] CPU After remains alive for the observation window
+[PASS] Deadlock Before records blocked workers
+[PASS] Deadlock Before records kernel lock waits
+[PASS] Deadlock Before remains hung for the observation window
+[PASS] Deadlock After disables concurrent workers
+[PASS] Deadlock After has no blocked worker evidence
+[PASS] healthy settings select the scheduling scenario
+
+All b1-2 evidence checks passed.
+[INFO] machine already exists: b1-2-agent
+[INFO] starting machine: b1-2-agent
+[INFO] verifying VM and evidence
+
+## VM and service user
+[PASS] machine architecture is amd64
+[PASS] service user exists
+[PASS] service user uid is 1000
+
+## Runtime files
+[PASS] agent binary
+[PASS] monitor.sh
+[PASS] monitor.sh syntax
+[PASS] run-scenario.sh
+[PASS] run-scenario.sh syntax
+[PASS] run-all-scenarios.sh
+[PASS] run-all-scenarios.sh syntax
+[PASS] setup-agent-env.sh
+[PASS] setup-agent-env.sh syntax
+[PASS] verify-results.sh
+[PASS] verify-results.sh syntax
+[PASS] verify-orbstack.sh
+[PASS] verify-orbstack.sh syntax
+
+## Required environment
+[PASS] sourceable agent environment
+[PASS] required API key file
+[PASS] API key has the expected test value
+[PASS] agent can write upload directory
+[PASS] agent can write log directory
+[PASS] agent can write evidence directory
+
+## Scenario evidence
+[PASS] oom_before application log
+[PASS] oom_before monitor log
+[PASS] oom_before runner metadata
+[PASS] oom_before boot checks
+[PASS] oom_before ready state
+[PASS] oom_after application log
+[PASS] oom_after monitor log
+[PASS] oom_after runner metadata
+[PASS] oom_after boot checks
+[PASS] oom_after ready state
+[PASS] cpu_before application log
+[PASS] cpu_before monitor log
+[PASS] cpu_before runner metadata
+[PASS] cpu_before boot checks
+[PASS] cpu_before ready state
+[PASS] cpu_after application log
+[PASS] cpu_after monitor log
+[PASS] cpu_after runner metadata
+[PASS] cpu_after boot checks
+[PASS] cpu_after ready state
+[PASS] deadlock_before application log
+[PASS] deadlock_before monitor log
+[PASS] deadlock_before runner metadata
+[PASS] deadlock_before boot checks
+[PASS] deadlock_before ready state
+[PASS] deadlock_after application log
+[PASS] deadlock_after monitor log
+[PASS] deadlock_after runner metadata
+[PASS] deadlock_after boot checks
+[PASS] deadlock_after ready state
+[PASS] scheduling application log
+[PASS] scheduling monitor log
+[PASS] scheduling runner metadata
+[PASS] scheduling boot checks
+[PASS] scheduling ready state
+[PASS] oom_before memory configuration
+[PASS] oom_before CPU configuration
+[PASS] oom_before concurrency configuration
+[PASS] oom_after memory configuration
+[PASS] oom_after CPU configuration
+[PASS] oom_after concurrency configuration
+[PASS] cpu_before memory configuration
+[PASS] cpu_before CPU configuration
+[PASS] cpu_before concurrency configuration
+[PASS] cpu_after memory configuration
+[PASS] cpu_after CPU configuration
+[PASS] cpu_after concurrency configuration
+[PASS] deadlock_before memory configuration
+[PASS] deadlock_before CPU configuration
+[PASS] deadlock_before concurrency configuration
+[PASS] deadlock_after memory configuration
+[PASS] deadlock_after CPU configuration
+[PASS] deadlock_after concurrency configuration
+[PASS] scheduling memory configuration
+[PASS] scheduling CPU configuration
+[PASS] scheduling concurrency configuration
+[PASS] OOM Before reproduces MemoryGuard termination
+[PASS] OOM Before exits by SIGKILL
+[PASS] OOM After recovers by flushing memory
+[PASS] OOM After remains alive for the observation window
+[PASS] CPU Before reproduces watchdog termination
+[PASS] CPU Before exits by SIGTERM
+[PASS] CPU After remains below the watchdog threshold
+[PASS] CPU After remains alive for the observation window
+[PASS] Deadlock Before records blocked workers
+[PASS] Deadlock Before records kernel lock waits
+[PASS] Deadlock Before remains hung for the observation window
+[PASS] Deadlock After disables concurrent workers
+[PASS] Deadlock After has no blocked worker evidence
+[PASS] healthy settings select the scheduling scenario
+
+All b1-2 evidence checks passed.
+
+OrbStack environment and b1-2 evidence verification passed.
+[INFO] machine already exists: b1-2-agent
+[INFO] starting machine: b1-2-agent
+[INFO] collecting evidence into: /Users/ihyeonmin/Desktop/Codyssey-workstation/b1-2/evidence
+./orbstack-machine.sh: line 193: syntax error near unexpected token `;;'

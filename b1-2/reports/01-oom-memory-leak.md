@@ -1,146 +1,119 @@
-# [Bug] Memory Leak / OOM - MemoryWorker의 무한 힙 증가로 MemoryGuard가 프로세스를 강제 종료함
+# [Bug] Memory Leak / OOM - 메모리 증가 후 MemoryGuard 자가 종료
 
-> 환경: OrbStack Ubuntu 24.04 (noble), amd64 / 실행 계정 `agent`(uid=1000, 비루트)
-> 대상: `agent-leak-app` (PyInstaller 패키징 Python 바이너리, 포트 15034)
-> 증거 파일: [`evidence/oom_before/`](../evidence/oom_before/) · [`evidence/oom_after/`](../evidence/oom_after/)
-
----
+> 환경: OrbStack Ubuntu 24.04, Linux amd64 / 비루트 `agent`(uid=1000) / 포트 15034
+> 실행 시작(UTC): Before `2026-10-16T08:01:48Z`, After `2026-10-16T08:02:08Z`
+> 앱·관제 로그 시각은 게스트 현지 시각이며 `run.log`의 `Z` 시각은 UTC다.
+> Before: [app.log](../evidence/oom_before/app.log) · [monitor.log](../evidence/oom_before/monitor.log) · [run.log](../evidence/oom_before/run.log) · [threads_snapshot.txt](../evidence/oom_before/threads_snapshot.txt)
+> After: [app.log](../evidence/oom_after/app.log) · [monitor.log](../evidence/oom_after/monitor.log) · [run.log](../evidence/oom_after/run.log) · [threads_snapshot.txt](../evidence/oom_after/threads_snapshot.txt)
 
 ## 1. Description (현상 설명)
 
-- **어떤 현상이 발생했는가?**
-  `agent-leak-app`을 실행하면 내부 `MemoryWorker`가 약 3초 주기로 힙을 25MB씩
-  계속 증가시킨다. 사용량이 `MEMORY_LIMIT`에 도달하는 순간, 애플리케이션의
-  메모리 보호 정책(**MemoryGuard**)이 발동하여 **예고 없이 프로세스가 강제 종료**된다.
-  (관제만 보면 "프로세스가 갑자기 사라진" 것으로 관측된다.)
+`MEMORY_LIMIT=128`, `CPU_MAX_OCCUPY=50`, `MULTI_THREAD_ENABLE=false`에서
+RSS가 시간에 따라 증가하고 `Memory limit exceeded`와 `Self-terminating process`를
+남긴 뒤 프로세스가 사라졌다. 로그에 기록된 애플리케이션 보호 정책에 따른 종료이며,
+커널 OOM Killer가 종료했다고 판정하지 않는다.
 
-- **언제, 어떤 조건에서 발생했는가?**
-  - `MULTI_THREAD_ENABLE=false` (단일 워크로드 모드)
-  - `MEMORY_LIMIT`이 **경고 범위(≤ 256MB, 부팅 배너 `Recommend Over 256MB`)** 로 설정된 경우
-  - 부팅 배너에서 다음과 같이 경고가 표시된다:
-    ```
-    [ MEMORY ] Limit: 128MB     [ WARNING: Recommend Over 256MB ]
-    ```
-
----
+```bash
+# VM 내 agent 계정에서 실행, 필수 경로·키는 setup-agent-env.sh로 구성
+cd /home/agent/agent-app
+bin/run-scenario.sh oom_before 128 50 false 40
+bin/run-scenario.sh oom_after 512 50 false 75
+```
 
 ## 2. Evidence & Logs (증거 자료)
 
-### 2-1. 프로그램 실행 로그 — 종료 직전/직후 (`evidence/oom_before/app.log`)
+Before 프로그램 로그(원본 발췌):
 
 ```text
-2026-07-07 18:01:06 [INFO] [MemoryWorker] Current Heap: 25MB
-2026-07-07 18:01:09 [INFO] [MemoryWorker] Current Heap: 50MB
-2026-07-07 18:01:12 [INFO] [MemoryWorker] Current Heap: 75MB
-2026-07-07 18:01:15 [INFO] [MemoryWorker] Current Heap: 100MB
-2026-07-07 18:01:18 [INFO] [MemoryWorker] Current Heap: 125MB
-2026-07-07 18:01:21 [INFO] [MemoryWorker] Current Heap: 150MB
-2026-07-07 18:01:21 [CRITICAL] [MemoryGuard] Memory limit exceeded (150MB >= 128MB) / (Recommend Over 256MB)
-2026-07-07 18:01:21 [CRITICAL] [MemoryGuard] Self-terminating process 15395 to prevent system instability.
+2026-10-16 17:01:50,250 [INFO] [MemoryWorker] Current Heap: 25MB
+2026-10-16 17:01:53,270 [INFO] [MemoryWorker] Current Heap: 50MB
+2026-10-16 17:01:56,293 [INFO] [MemoryWorker] Current Heap: 75MB
+2026-10-16 17:01:59,318 [INFO] [MemoryWorker] Current Heap: 100MB
+2026-10-16 17:02:02,342 [INFO] [MemoryWorker] Current Heap: 125MB
+2026-10-16 17:02:05,366 [INFO] [MemoryWorker] Current Heap: 150MB
+2026-10-16 17:02:05,366 [CRITICAL] [MemoryGuard] Memory limit exceeded (150MB >= 128MB) / (Recommend Over 256MB)
+2026-10-16 17:02:05,366 [CRITICAL] [MemoryGuard] Self-terminating process 4461 to prevent system instability.
 ```
 
-핵심 로그: **`Memory limit exceeded (150MB >= 128MB)`**, **`Self-terminating process 15395`**
-
-### 2-2. monitor.sh 관제 로그 — 물리 메모리(RSS) 상승 수치 (`evidence/oom_before/monitor.log`)
+Before `monitor.sh`의 OS 관제 행. 열은 시각 / PID / STAT / %CPU / RSS(MB) / 스레드 / 경과다.
 
 ```text
-TIMESTAMP                 | PID    | STAT | %CPU   | RSS(MB)  | THREADS | ELAPSED
-2026-07-07 18:01:06.269   | 15395  | SN   | 0.0    | 25       | 1       | 1s
-2026-07-07 18:01:07.590   | 15395  | SN   | 1.5    | 50       | 1       | 2s
-2026-07-07 18:01:10.262   | 15395  | SN   | 0.7    | 75       | 1       | 5s
-2026-07-07 18:01:12.879   | 15395  | SN   | 0.0    | 100      | 1       | 8s
-2026-07-07 18:01:16.823   | 15395  | SN   | 0.0    | 125      | 1       | 12s
-2026-07-07 18:01:19.450   | 15395  | SN   | 1.5    | 150      | 1       | 14s
-[monitor.sh] 2026-07-07 18:01:22 PID=15395 프로세스 없음 (종료/소멸 추정). 대기 1/3
+2026-10-16 17:01:48.539   | 4461   | SN   | -      | 25       | 1       | 0s
+2026-10-16 17:01:51.052   | 4461   | SN   | 0.0    | 50       | 1       | 2s
+2026-10-16 17:01:53.562   | 4461   | SN   | 0.0    | 75       | 1       | 5s
+2026-10-16 17:01:56.063   | 4461   | SN   | 0.0    | 75       | 1       | 7s
+2026-10-16 17:01:58.559   | 4461   | SN   | 0.0    | 100      | 1       | 10s
+2026-10-16 17:02:01.069   | 4461   | SN   | 0.0    | 125      | 1       | 12s
+2026-10-16 17:02:03.571   | 4461   | SN   | 0.8    | 150      | 1       | 15s
+2026-10-16 17:02:04.827   | 4461   | SN   | 0.0    | 150      | 1       | 16s
 ```
 
-`RSS(MB)` 컬럼이 **25 → 50 → 75 → 100 → 125 → 150**으로 단조 증가하다가 프로세스가
-사라진다. 앱이 자체 보고한 Heap 수치와 OS가 관측한 RSS가 정확히 일치한다.
-
-### 2-3. 프로세스 종료 코드
+RSS는 25→150MB로 증가했다. `run.log`:
 
 ```text
-[run-scenario] app exit code: 137 (elapsed 17s)   # 137 = 128 + 9(SIGKILL)
+label=oom_before
+started_at=2026-10-16T08:01:48Z
+MEMORY_LIMIT=128
+CPU_MAX_OCCUPY=50
+MULTI_THREAD_ENABLE=false
+max_seconds=40
+launcher_pid=4451
+monitor_pid=4454
+timed_out=false
+app_exit_code=137
+monitor_exit_code=0
+elapsed_seconds=17
+completed_at=2026-10-16T08:02:08Z
 ```
-
-종료 코드 **137**은 `SIGKILL(9)`에 의한 종료를 의미한다. MemoryGuard가 워커
-프로세스를 `kill -9`로 강제 종료했음을 뒷받침한다.
-
----
 
 ## 3. Root Cause Analysis (원인 분석)
 
-### 기술적 원인
-- `MemoryWorker`가 참조를 계속 유지하는 객체를 주기적으로 할당하여 **힙이 회수되지
-  않고 무한히 증가(전형적 Memory Leak)** 한다. GC가 회수할 수 없는 참조가 계속
-  쌓이므로 사용량은 시간에 비례해 우상향한다.
-- 애플리케이션은 자체 감시 스레드(**MemoryGuard**)로 현재 사용량과 `MEMORY_LIMIT`을
-  비교한다. `사용량 ≥ MEMORY_LIMIT`이 되면, 시스템 전체의 불안정(호스트 OOM Killer
-  개입, 스와핑, 동거 프로세스 피해)을 예방하기 위해 **자기 자신을 선제적으로 종료**한다.
-
-### 관련 OS 동작 원리
-- 프로세스의 물리 메모리 점유는 `RSS(Resident Set Size)`로 관측되며, 본 관제는
-  `ps -o rss`로 이를 수집했다.
-- 리눅스는 물리 메모리가 고갈되면 커널의 **OOM Killer**가 `oom_score`가 높은
-  프로세스를 강제 종료한다. 본 앱의 MemoryGuard는 이 커널 개입 **이전에** 스스로
-  종료하여, 어떤 프로세스가 왜 죽었는지 로그로 남기는 "graceful self-termination"
-  전략을 취한다. (로그 없이 커널에 의해 죽는 것보다 원인 추적에 유리하다.)
-
----
+- 관측 사실: `Current Heap`와 OS RSS가 증가하고, 임계 초과·자가 종료 로그 직후
+  `timed_out=false`, 종료 코드 137이 기록됐다. 이는 SIGKILL(128+9) 종료와 부합한다.
+- 추론: 워크로드가 메모리를 계속 보유·할당하는 누수성 패턴으로 판단한다. 객체 참조,
+  GC 회수 실패, 감시 스레드 구현 등 내부 원인은 소스/메모리 분석 없이 확정할 수 없다.
+- OS 원리: RSS는 물리 메모리에 상주하는 페이지 양이다. 가용 메모리가 부족해지면
+  회수·스왑 등으로 지연이 발생할 수 있다. 이 실행에서는 커널 OOM 로그를 수집하지
+  않았고 앱의 MemoryGuard 로그가 있어 앱 자체 보호 종료로 해석한다.
+- SIGKILL은 정리 핸들러를 실행할 수 없는 강제 종료다. 정상적인 정리 완료로 표현하지 않는다.
 
 ## 4. Workaround & Verification (조치 및 검증)
 
-### 조치: 환경변수 `MEMORY_LIMIT` 상향 (경고 범위 → 안전 범위)
-
-`MEMORY_LIMIT`을 경고 범위(128MB)에서 안전 범위(512MB)로 상향하여 재실행했다.
-
-```bash
-# Before
-MEMORY_LIMIT=128 CPU_MAX_OCCUPY=50 MULTI_THREAD_ENABLE=false  ./agent-leak-app
-# After
-MEMORY_LIMIT=512 CPU_MAX_OCCUPY=50 MULTI_THREAD_ENABLE=false  ./agent-leak-app
-```
-
-### After 결과 — 강제 종료 대신 "복구"로 전환 (`evidence/oom_after/app.log`)
+`MEMORY_LIMIT`만 128→512MB로 변경했다. After에서는 Healthy 시나리오로 전환되고
+메모리 한계 도달 시 캐시 정리·복구 로그가 나타났다. 단순히 한계만 늘려 같은 누수를
+늦춘 결과로 일반화하지 않는다. 이 앱의 설정에 따른 실행 경로 변경도 함께 관측됐다.
 
 ```text
-2026-07-07 18:02:22 [INFO]    [MemoryWorker] Current Heap: 475MB
-2026-07-07 18:02:25 [INFO]    [MemoryWorker] Current Heap: 500MB
-2026-07-07 18:02:28 [INFO]    [MemoryWorker] Current Heap: 525MB
-2026-07-07 18:02:28 [WARNING] [MemoryWorker] Memory Usage Reached Limit (525MB). Starting cleanup...
-2026-07-07 18:02:28 [INFO]    [System] Memory Cache Flushed. Process Stabilized.
+2026-10-16 17:02:11,582 [INFO] [MemoryWorker] Current Heap: 25MB
+2026-10-16 17:03:09,019 [INFO] [MemoryWorker] Current Heap: 500MB
+2026-10-16 17:03:12,046 [INFO] [MemoryWorker] Current Heap: 525MB
+2026-10-16 17:03:12,047 [WARNING] [MemoryWorker] Memory Usage Reached Limit (525MB). Starting cleanup...
+2026-10-16 17:03:12,063 [INFO] [System] Memory Cache Flushed. Process Stabilized.
 >>> [SYSTEM] MEMORY RECOVERED (Cache Cleared) <<<
-2026-07-07 18:02:33 [INFO]    [MemoryWorker] Current Heap: 25MB      # 힙 리셋 후 재개
+2026-10-16 17:03:17,103 [INFO] [MemoryWorker] Current Heap: 25MB
 ```
 
-`evidence/oom_after/monitor.log`의 RSS는 **25 → … → 525 → 25**의 **톱니(sawtooth)
-패턴**을 그리며, 프로세스는 관측 시간(75초) 내내 **종료되지 않고 생존**했다.
+After OS 관측:
 
-### Before & After 비교
+```text
+2026-10-16 17:02:09.042   | 5017   | SN   | -      | 25       | 1       | 0s
+2026-10-16 17:02:23.011   | 5017   | SNl  | 0.0    | 125      | 3       | 14s
+2026-10-16 17:02:37.004   | 5017   | SNl  | 3.9    | 250      | 3       | 28s
+2026-10-16 17:02:50.988   | 5017   | SNl  | 0.0    | 350      | 3       | 42s
+2026-10-16 17:03:04.995   | 5017   | SNl  | 1.6    | 475      | 3       | 56s      [WARNING RSS>=400MB]
+2026-10-16 17:03:19.015   | 5017   | SNl  | 0.0    | 50       | 3       | 70s
+2026-10-16 17:03:22.832   | 5017   | SNl  | 0.0    | 75       | 3       | 74s
+```
 
-| 항목 | Before (`MEMORY_LIMIT=128`) | After (`MEMORY_LIMIT=512`) |
+| 항목 | Before | After |
 | --- | --- | --- |
-| 부팅 배너 | `WARNING: Recommend Over 256MB` | `[ OK ]` |
-| 한계 도달 시 동작 | MemoryGuard **강제 종료** | 캐시 플러시 후 **복구** |
-| 핵심 로그 | `Self-terminating process` | `MEMORY RECOVERED (Cache Cleared)` |
-| 종료 코드 | **137 (SIGKILL)** | 미종료 (75s+ 생존, 정리 시 143) |
-| 생존 시간 | 약 **17초** | **75초 이상 (지속)** |
+| MEMORY_LIMIT | 128MB | 512MB |
+| 관측 경과 | 17초 | 75초 |
+| 앱 종료 코드 | 137 | 143 |
+| 관측 종료 후 정리(`timed_out`) | false | true |
+| OS RSS 범위 | 25–150MB | 25–525MB |
+| 임계 도달 결과 | 자가 종료 | 캐시 정리 후 작업 재개 |
 
-### 근본적 해결을 위한 추가 제안 (선택)
-- 위 조치는 **임시(Workaround)** 이다. 힙 증가 자체는 여전히 존재하므로, 안전
-  범위에서도 사용량이 주기적으로 한계까지 차오른다. 근본 해결은 **MemoryWorker의
-  누수 지점(회수되지 않는 참조) 제거**가 필요하다.
-- 운영 관점에서는 `MEMORY_LIMIT`을 안전 범위로 두어 즉시 크래시를 막고, 관제
-  경고(`RSS ≥ 임계`) 기반 알림을 걸어 누수 추세를 조기에 감지하는 것을 권장한다.
-
----
-
-### 재현 방법 (Reproducibility)
-
-```bash
-# VM(OrbStack) 내 agent 계정에서
-cd /home/agent/agent-app
-bin/run-scenario.sh oom_before 128 50 false 40   # 강제 종료 재현
-bin/run-scenario.sh oom_after  512 50 false 75   # 복구/생존 재현
-# 결과: evidence/oom_before/, evidence/oom_after/ 에 app.log · monitor.log 저장
-```
+After의 143은 관측 시간 만료 후 실행 스크립트가 보낸 TERM 정리 결과다.
+관측 구간 내 복구·생존이 확인됐으며 무기한 안정성을 보장하지 않는다.
+근본 해결 제안: 소스 접근이 허용되는 별도 단계에서 보유 객체·캐시 수명과 크기 제한을 점검한다.

@@ -1,13 +1,13 @@
 label=deadlock_after
-started_at=2026-07-13T12:45:15Z
+started_at=2026-10-16T08:05:22Z
 MEMORY_LIMIT=512
 CPU_MAX_OCCUPY=50
 MULTI_THREAD_ENABLE=false
 max_seconds=35
-launcher_pid=7174
-monitor_pid=7177
+launcher_pid=10397
+monitor_pid=10400
 timed_out=true
 app_exit_code=143
 monitor_exit_code=0
 elapsed_seconds=35
-completed_at=2026-07-13T12:45:53Z
+completed_at=2026-10-16T08:06:00Z

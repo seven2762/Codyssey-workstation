@@ -1,0 +1,32 @@
+PASS: oom_before: multiple OS samples
+PASS: oom_before: boot checks passed
+PASS: oom_after: multiple OS samples
+PASS: oom_after: boot checks passed
+PASS: cpu_before: multiple OS samples
+PASS: cpu_before: boot checks passed
+PASS: cpu_after: multiple OS samples
+PASS: cpu_after: boot checks passed
+PASS: deadlock_before: multiple OS samples
+PASS: deadlock_before: boot checks passed
+PASS: deadlock_after: multiple OS samples
+PASS: deadlock_after: boot checks passed
+PASS: scheduling: multiple OS samples
+PASS: scheduling: boot checks passed
+PASS: OOM: measured RSS increases
+PASS: OOM: explicit application termination logs
+PASS: OOM: natural SIGKILL exit before runner cleanup
+PASS: OOM: logged recovery and measured RSS drop
+PASS: OOM: longer After observation without self termination
+PASS: CPU: threshold log and SIGTERM before runner cleanup
+PASS: CPU: lower target reaches cooldown without policy termination
+INFO: cpu_before measured OS CPU peak=4.0% (one core=100%); application Current Load is a separate metric
+FAIL: CPU mission: OS-measured CPU reaches 50% (explicit verification criterion)
+PASS: Deadlock: opposing resource ownership and waits
+PASS: Deadlock: PID/thread snapshot contains kernel lock waits
+PASS: Deadlock: same live PID, stable RSS and near-zero CPU across final samples
+PASS: Deadlock: PID observed 26s after final app log
+PASS: Deadlock: After workload progresses through observation window
+PASS: 01-oom-memory-leak.md: quoted text matches original evidence lines
+PASS: 02-cpu-spike.md: quoted text matches original evidence lines
+PASS: 03-deadlock.md: quoted text matches original evidence lines
+PASS: 04-scheduling-analysis.md: quoted text matches original evidence lines

@@ -1,0 +1,25 @@
+[INFO] machine already exists: b1-2-agent
+[INFO] starting machine: b1-2-agent
+[INFO] staging runtime in VM: /tmp/b1-2-provision.emNanz
+[provision] required packages already installed
+[provision] installing runtime into /home/agent/agent-app
+[provision] configuring reproducible agent environment
+[setup-agent-env] preserving existing key file: /home/agent/agent-app/api_keys/secret.key
+[setup-agent-env] environment ready
+  AGENT_HOME=/home/agent/agent-app
+  AGENT_PORT=15034
+  ENV_FILE=/home/agent/agent-app/.env
+  load with: source /home/agent/agent-app/.env
+
+========================================
+  b1-2 OrbStack VM provisioning complete
+========================================
+machine arch : x86_64
+service user : agent (uid=1000)
+agent home   : /home/agent/agent-app
+
+Run all scenarios:
+  sudo -u agent -H env AGENT_HOME=/home/agent/agent-app /home/agent/agent-app/bin/run-all-scenarios.sh
+
+Verify environment and evidence:
+  sudo b1-2-verify

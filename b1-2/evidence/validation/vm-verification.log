@@ -1,0 +1,111 @@
+[INFO] machine already exists: b1-2-agent
+[INFO] starting machine: b1-2-agent
+[INFO] verifying VM and evidence
+
+## VM and service user
+[PASS] machine architecture is amd64
+[PASS] service user exists
+[PASS] service user uid is 1000
+
+## Runtime files
+[PASS] agent binary
+[PASS] monitor.sh
+[PASS] monitor.sh syntax
+[PASS] run-scenario.sh
+[PASS] run-scenario.sh syntax
+[PASS] run-all-scenarios.sh
+[PASS] run-all-scenarios.sh syntax
+[PASS] setup-agent-env.sh
+[PASS] setup-agent-env.sh syntax
+[PASS] verify-results.sh
+[PASS] verify-results.sh syntax
+[PASS] verify-orbstack.sh
+[PASS] verify-orbstack.sh syntax
+
+## Required environment
+[PASS] sourceable agent environment
+[PASS] required API key file
+[PASS] API key has the expected test value
+[PASS] agent can write upload directory
+[PASS] agent can write log directory
+[PASS] agent can write evidence directory
+
+## Scenario evidence
+[PASS] oom_before application log
+[PASS] oom_before monitor log
+[PASS] oom_before runner metadata
+[PASS] oom_before boot checks
+[PASS] oom_before ready state
+[PASS] oom_after application log
+[PASS] oom_after monitor log
+[PASS] oom_after runner metadata
+[PASS] oom_after boot checks
+[PASS] oom_after ready state
+[PASS] cpu_before application log
+[PASS] cpu_before monitor log
+[PASS] cpu_before runner metadata
+[PASS] cpu_before boot checks
+[PASS] cpu_before ready state
+[PASS] cpu_after application log
+[PASS] cpu_after monitor log
+[PASS] cpu_after runner metadata
+[PASS] cpu_after boot checks
+[PASS] cpu_after ready state
+[PASS] deadlock_before application log
+[PASS] deadlock_before monitor log
+[PASS] deadlock_before runner metadata
+[PASS] deadlock_before boot checks
+[PASS] deadlock_before ready state
+[PASS] deadlock_after application log
+[PASS] deadlock_after monitor log
+[PASS] deadlock_after runner metadata
+[PASS] deadlock_after boot checks
+[PASS] deadlock_after ready state
+[PASS] scheduling application log
+[PASS] scheduling monitor log
+[PASS] scheduling runner metadata
+[PASS] scheduling boot checks
+[PASS] scheduling ready state
+[PASS] oom_before memory configuration
+[PASS] oom_before CPU configuration
+[PASS] oom_before concurrency configuration
+[PASS] oom_after memory configuration
+[PASS] oom_after CPU configuration
+[PASS] oom_after concurrency configuration
+[PASS] cpu_before memory configuration
+[PASS] cpu_before CPU configuration
+[PASS] cpu_before concurrency configuration
+[PASS] cpu_after memory configuration
+[PASS] cpu_after CPU configuration
+[PASS] cpu_after concurrency configuration
+[PASS] deadlock_before memory configuration
+[PASS] deadlock_before CPU configuration
+[PASS] deadlock_before concurrency configuration
+[PASS] deadlock_after memory configuration
+[PASS] deadlock_after CPU configuration
+[PASS] deadlock_after concurrency configuration
+[PASS] scheduling memory configuration
+[PASS] scheduling CPU configuration
+[PASS] scheduling concurrency configuration
+[PASS] OOM Before reproduces MemoryGuard termination
+[PASS] OOM Before exits by SIGKILL
+[PASS] OOM Before terminates before runner cleanup
+[PASS] OOM After recovers by flushing memory
+[PASS] OOM After remains alive for the observation window
+[PASS] CPU Before reproduces watchdog termination
+[PASS] CPU Before exits by SIGTERM
+[PASS] CPU Before terminates before runner cleanup
+[PASS] CPU After remains below the watchdog threshold
+[PASS] CPU After remains alive for the observation window
+[PASS] Deadlock Before records blocked workers
+[PASS] Deadlock Before records kernel lock waits
+[PASS] Deadlock Before remains hung for the observation window
+[PASS] Deadlock After disables concurrent workers
+[PASS] Deadlock After has no blocked worker evidence
+[PASS] Deadlock After remains alive through the observation window
+[PASS] healthy settings select the scheduling scenario
+
+All b1-2 evidence checks passed.
+Scope: application scenario checks only; run tests/check_evidence.py for measured trends and OS CPU limitations.
+
+OrbStack environment and b1-2 evidence verification passed.

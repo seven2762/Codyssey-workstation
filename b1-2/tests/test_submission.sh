@@ -255,6 +255,11 @@ run_verifier_contract_test() {
     assert_not_contains "$evidence/deadlock_after/app.log" 'Status: BLOCKED' \
         "Deadlock After fixture remains free of blocked workers"
 
+    sed -i.bak 's/^timed_out=false$/timed_out=true/' "$evidence/cpu_before/run.log"
+    assert_command_fails "verify-results.sh rejects runner cleanup as CPU policy termination" \
+        env EVIDENCE_ROOT="$evidence" bash "$ROOT_DIR/verify-results.sh"
+    sed -i.bak 's/^timed_out=true$/timed_out=false/' "$evidence/cpu_before/run.log"
+
     sed -i.bak '/CPU Threshold Violated/d' "$evidence/cpu_before/app.log"
     assert_command_fails "verify-results.sh rejects missing CPU failure evidence" \
         env EVIDENCE_ROOT="$evidence" bash "$ROOT_DIR/verify-results.sh"

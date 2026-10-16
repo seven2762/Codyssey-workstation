@@ -1,104 +1,110 @@
 ===================================================================================
-[monitor.sh] START 2026-07-13 21:44:37.173
+[monitor.sh] START 2026-10-16 17:04:44.443
   pattern='agent-leak-app'  interval=1s  duration=35s(0=inf)
   warn: CPU>80%, RSS>400MB   (%CPU=/proc 기반 순간값, 1코어=100%)
 -----------------------------------------------------------------------------------
 TIMESTAMP                 | PID    | STAT | %CPU   | RSS(MB)  | THREADS | ELAPSED
 -----------------------------------------------------------------------------------
-[monitor.sh] 관제 시작: PID=6166
-2026-07-13 21:44:37.675   | 6166   | SN   | -      | 25       | 1       | 0s
-        └ thread TID=6166 STAT=SN CPU=20.9% WCHAN=do_select
-2026-07-13 21:44:39.030   | 6166   | SN   | 0.0    | 25       | 1       | 1s
-        └ thread TID=6166 STAT=SN CPU=6.6% WCHAN=do_select
-2026-07-13 21:44:40.377   | 6166   | SN   | 0.0    | 25       | 1       | 3s
-        └ thread TID=6166 STAT=SN CPU=3.9% WCHAN=do_select
-2026-07-13 21:44:41.715   | 6166   | SN   | 0.0    | 25       | 1       | 4s
-        └ thread TID=6166 STAT=SN CPU=2.7% WCHAN=do_select
-2026-07-13 21:44:43.067   | 6166   | SN   | 0.0    | 25       | 1       | 5s
-        └ thread TID=6166 STAT=SN CPU=2.1% WCHAN=do_select
-2026-07-13 21:44:44.420   | 6166   | SN   | 0.0    | 25       | 1       | 7s
-        └ thread TID=6166 STAT=SNl CPU=1.7% WCHAN=futex_wait
-        └ thread TID=6371 STAT=SNl CPU=0.0% WCHAN=do_select
-        └ thread TID=6376 STAT=SNl CPU=0.0% WCHAN=do_select
-2026-07-13 21:44:45.804   | 6166   | SNl  | 0.0    | 25       | 3       | 8s
-        └ thread TID=6166 STAT=SNl CPU=1.4% WCHAN=futex_wait
-        └ thread TID=6371 STAT=SNl CPU=0.0% WCHAN=do_select
-        └ thread TID=6376 STAT=SNl CPU=0.0% WCHAN=do_select
-2026-07-13 21:44:47.173   | 6166   | SNl  | 0.7    | 25       | 3       | 9s
-        └ thread TID=6166 STAT=SNl CPU=1.2% WCHAN=futex_wait
-        └ thread TID=6371 STAT=SNl CPU=0.0% WCHAN=futex_wait
-        └ thread TID=6376 STAT=SNl CPU=0.0% WCHAN=futex_wait
-2026-07-13 21:44:48.530   | 6166   | SNl  | 0.0    | 25       | 3       | 11s
-        └ thread TID=6166 STAT=SNl CPU=1.1% WCHAN=futex_wait
-        └ thread TID=6371 STAT=SNl CPU=0.0% WCHAN=futex_wait
-        └ thread TID=6376 STAT=SNl CPU=0.0% WCHAN=futex_wait
-2026-07-13 21:44:49.895   | 6166   | SNl  | 0.0    | 25       | 3       | 12s
-        └ thread TID=6166 STAT=SNl CPU=1.0% WCHAN=futex_wait
-        └ thread TID=6371 STAT=SNl CPU=0.0% WCHAN=futex_wait
-        └ thread TID=6376 STAT=SNl CPU=0.0% WCHAN=futex_wait
-2026-07-13 21:44:51.281   | 6166   | SNl  | 0.0    | 25       | 3       | 14s
-        └ thread TID=6166 STAT=SNl CPU=0.9% WCHAN=futex_wait
-        └ thread TID=6371 STAT=SNl CPU=0.0% WCHAN=futex_wait
-        └ thread TID=6376 STAT=SNl CPU=0.0% WCHAN=futex_wait
-2026-07-13 21:44:52.665   | 6166   | SNl  | 0.0    | 25       | 3       | 15s
-        └ thread TID=6166 STAT=SNl CPU=0.8% WCHAN=futex_wait
-        └ thread TID=6371 STAT=SNl CPU=0.0% WCHAN=futex_wait
-        └ thread TID=6376 STAT=SNl CPU=0.0% WCHAN=futex_wait
-2026-07-13 21:44:54.046   | 6166   | SNl  | 0.0    | 25       | 3       | 16s
-        └ thread TID=6166 STAT=SNl CPU=0.7% WCHAN=futex_wait
-        └ thread TID=6371 STAT=SNl CPU=0.0% WCHAN=futex_wait
-        └ thread TID=6376 STAT=SNl CPU=0.0% WCHAN=futex_wait
-2026-07-13 21:44:55.430   | 6166   | SNl  | 0.0    | 25       | 3       | 18s
-        └ thread TID=6166 STAT=SNl CPU=0.7% WCHAN=futex_wait
-        └ thread TID=6371 STAT=SNl CPU=0.0% WCHAN=futex_wait
-        └ thread TID=6376 STAT=SNl CPU=0.0% WCHAN=futex_wait
-2026-07-13 21:44:56.814   | 6166   | SNl  | 0.0    | 25       | 3       | 19s
-        └ thread TID=6166 STAT=SNl CPU=0.6% WCHAN=futex_wait
-        └ thread TID=6371 STAT=SNl CPU=0.0% WCHAN=futex_wait
-        └ thread TID=6376 STAT=SNl CPU=0.0% WCHAN=futex_wait
-2026-07-13 21:44:58.202   | 6166   | SNl  | 0.0    | 25       | 3       | 20s
-        └ thread TID=6166 STAT=SNl CPU=0.6% WCHAN=futex_wait
-        └ thread TID=6371 STAT=SNl CPU=0.0% WCHAN=futex_wait
-        └ thread TID=6376 STAT=SNl CPU=0.0% WCHAN=futex_wait
-2026-07-13 21:44:59.578   | 6166   | SNl  | 0.0    | 25       | 3       | 22s
-        └ thread TID=6166 STAT=SNl CPU=0.5% WCHAN=futex_wait
-        └ thread TID=6371 STAT=SNl CPU=0.0% WCHAN=futex_wait
-        └ thread TID=6376 STAT=SNl CPU=0.0% WCHAN=futex_wait
-2026-07-13 21:45:00.926   | 6166   | SNl  | 0.0    | 25       | 3       | 23s
-        └ thread TID=6166 STAT=SNl CPU=0.5% WCHAN=futex_wait
-        └ thread TID=6371 STAT=SNl CPU=0.0% WCHAN=futex_wait
-        └ thread TID=6376 STAT=SNl CPU=0.0% WCHAN=futex_wait
-2026-07-13 21:45:02.274   | 6166   | SNl  | 0.0    | 25       | 3       | 24s
-        └ thread TID=6166 STAT=SNl CPU=0.5% WCHAN=futex_wait
-        └ thread TID=6371 STAT=SNl CPU=0.0% WCHAN=futex_wait
-        └ thread TID=6376 STAT=SNl CPU=0.0% WCHAN=futex_wait
-2026-07-13 21:45:03.658   | 6166   | SNl  | 0.0    | 25       | 3       | 26s
-        └ thread TID=6166 STAT=SNl CPU=0.4% WCHAN=futex_wait
-        └ thread TID=6371 STAT=SNl CPU=0.0% WCHAN=futex_wait
-        └ thread TID=6376 STAT=SNl CPU=0.0% WCHAN=futex_wait
-2026-07-13 21:45:05.043   | 6166   | SNl  | 0.0    | 25       | 3       | 27s
-        └ thread TID=6166 STAT=SNl CPU=0.4% WCHAN=futex_wait
-        └ thread TID=6371 STAT=SNl CPU=0.0% WCHAN=futex_wait
-        └ thread TID=6376 STAT=SNl CPU=0.0% WCHAN=futex_wait
-2026-07-13 21:45:06.430   | 6166   | SNl  | 0.0    | 25       | 3       | 29s
-        └ thread TID=6166 STAT=SNl CPU=0.4% WCHAN=futex_wait
-        └ thread TID=6371 STAT=SNl CPU=0.0% WCHAN=futex_wait
-        └ thread TID=6376 STAT=SNl CPU=0.0% WCHAN=futex_wait
-2026-07-13 21:45:07.807   | 6166   | SNl  | 0.0    | 25       | 3       | 30s
-        └ thread TID=6166 STAT=SNl CPU=0.4% WCHAN=futex_wait
-        └ thread TID=6371 STAT=SNl CPU=0.0% WCHAN=futex_wait
-        └ thread TID=6376 STAT=SNl CPU=0.0% WCHAN=futex_wait
-2026-07-13 21:45:09.191   | 6166   | SNl  | 0.0    | 25       | 3       | 31s
-        └ thread TID=6166 STAT=SNl CPU=0.4% WCHAN=futex_wait
-        └ thread TID=6371 STAT=SNl CPU=0.0% WCHAN=futex_wait
-        └ thread TID=6376 STAT=SNl CPU=0.0% WCHAN=futex_wait
-2026-07-13 21:45:10.539   | 6166   | SNl  | 0.0    | 25       | 3       | 33s
-        └ thread TID=6166 STAT=SNl CPU=0.3% WCHAN=futex_wait
-        └ thread TID=6371 STAT=SNl CPU=0.0% WCHAN=futex_wait
-        └ thread TID=6376 STAT=SNl CPU=0.0% WCHAN=futex_wait
-2026-07-13 21:45:11.908   | 6166   | SNl  | 0.0    | 25       | 3       | 34s
-        └ thread TID=6166 STAT=SNl CPU=0.3% WCHAN=futex_wait
-        └ thread TID=6371 STAT=SNl CPU=0.0% WCHAN=futex_wait
-        └ thread TID=6376 STAT=SNl CPU=0.0% WCHAN=futex_wait
+[monitor.sh] 관제 시작: PID=9343
+2026-10-16 17:04:44.792   | 9343   | SN   | -      | 25       | 1       | 0s
+        └ thread TID=9343 STAT=SN CPU=20.9% WCHAN=do_select
+2026-10-16 17:04:46.046   | 9343   | SN   | 0.0    | 25       | 1       | 1s
+        └ thread TID=9343 STAT=SN CPU=5.3% WCHAN=do_select
+2026-10-16 17:04:47.298   | 9343   | SN   | 0.0    | 25       | 1       | 2s
+        └ thread TID=9343 STAT=SN CPU=3.0% WCHAN=do_select
+2026-10-16 17:04:48.545   | 9343   | SN   | 0.0    | 25       | 1       | 4s
+        └ thread TID=9343 STAT=SN CPU=2.1% WCHAN=do_select
+2026-10-16 17:04:49.795   | 9343   | SN   | 0.0    | 25       | 1       | 5s
+        └ thread TID=9343 STAT=SN CPU=1.6% WCHAN=do_select
+2026-10-16 17:04:51.039   | 9343   | SN   | 0.0    | 25       | 1       | 6s
+        └ thread TID=9343 STAT=SN CPU=1.3% WCHAN=do_select
+2026-10-16 17:04:52.292   | 9343   | SNl  | 0.8    | 25       | 3       | 7s
+        └ thread TID=9343 STAT=SNl CPU=1.2% WCHAN=futex_wait
+        └ thread TID=9566 STAT=SNl CPU=0.0% WCHAN=do_select
+        └ thread TID=9567 STAT=SNl CPU=0.0% WCHAN=do_select
+2026-10-16 17:04:53.567   | 9343   | SNl  | 0.0    | 25       | 3       | 9s
+        └ thread TID=9343 STAT=SNl CPU=1.0% WCHAN=futex_wait
+        └ thread TID=9566 STAT=SNl CPU=0.0% WCHAN=futex_wait
+        └ thread TID=9567 STAT=SNl CPU=0.0% WCHAN=futex_wait
+2026-10-16 17:04:54.834   | 9343   | SNl  | 0.0    | 25       | 3       | 10s
+        └ thread TID=9343 STAT=SNl CPU=0.9% WCHAN=futex_wait
+        └ thread TID=9566 STAT=SNl CPU=0.0% WCHAN=futex_wait
+        └ thread TID=9567 STAT=SNl CPU=0.0% WCHAN=futex_wait
+2026-10-16 17:04:56.114   | 9343   | SNl  | 0.0    | 25       | 3       | 11s
+        └ thread TID=9343 STAT=SNl CPU=0.8% WCHAN=futex_wait
+        └ thread TID=9566 STAT=SNl CPU=0.0% WCHAN=futex_wait
+        └ thread TID=9567 STAT=SNl CPU=0.0% WCHAN=futex_wait
+2026-10-16 17:04:57.391   | 9343   | SNl  | 0.0    | 25       | 3       | 12s
+        └ thread TID=9343 STAT=SNl CPU=0.7% WCHAN=futex_wait
+        └ thread TID=9566 STAT=SNl CPU=0.0% WCHAN=futex_wait
+        └ thread TID=9567 STAT=SNl CPU=0.0% WCHAN=futex_wait
+2026-10-16 17:04:58.666   | 9343   | SNl  | 0.0    | 25       | 3       | 14s
+        └ thread TID=9343 STAT=SNl CPU=0.6% WCHAN=futex_wait
+        └ thread TID=9566 STAT=SNl CPU=0.0% WCHAN=futex_wait
+        └ thread TID=9567 STAT=SNl CPU=0.0% WCHAN=futex_wait
+2026-10-16 17:04:59.927   | 9343   | SNl  | 0.0    | 25       | 3       | 15s
+        └ thread TID=9343 STAT=SNl CPU=0.6% WCHAN=futex_wait
+        └ thread TID=9566 STAT=SNl CPU=0.0% WCHAN=futex_wait
+        └ thread TID=9567 STAT=SNl CPU=0.0% WCHAN=futex_wait
+2026-10-16 17:05:01.202   | 9343   | SNl  | 0.0    | 25       | 3       | 16s
+        └ thread TID=9343 STAT=SNl CPU=0.5% WCHAN=futex_wait
+        └ thread TID=9566 STAT=SNl CPU=0.0% WCHAN=futex_wait
+        └ thread TID=9567 STAT=SNl CPU=0.0% WCHAN=futex_wait
+2026-10-16 17:05:02.477   | 9343   | SNl  | 0.0    | 25       | 3       | 17s
+        └ thread TID=9343 STAT=SNl CPU=0.5% WCHAN=futex_wait
+        └ thread TID=9566 STAT=SNl CPU=0.0% WCHAN=futex_wait
+        └ thread TID=9567 STAT=SNl CPU=0.0% WCHAN=futex_wait
+2026-10-16 17:05:03.749   | 9343   | SNl  | 0.0    | 25       | 3       | 19s
+        └ thread TID=9343 STAT=SNl CPU=0.5% WCHAN=futex_wait
+        └ thread TID=9566 STAT=SNl CPU=0.0% WCHAN=futex_wait
+        └ thread TID=9567 STAT=SNl CPU=0.0% WCHAN=futex_wait
+2026-10-16 17:05:05.023   | 9343   | SNl  | 0.0    | 25       | 3       | 20s
+        └ thread TID=9343 STAT=SNl CPU=0.4% WCHAN=futex_wait
+        └ thread TID=9566 STAT=SNl CPU=0.0% WCHAN=futex_wait
+        └ thread TID=9567 STAT=SNl CPU=0.0% WCHAN=futex_wait
+2026-10-16 17:05:06.292   | 9343   | SNl  | 0.0    | 25       | 3       | 21s
+        └ thread TID=9343 STAT=SNl CPU=0.4% WCHAN=futex_wait
+        └ thread TID=9566 STAT=SNl CPU=0.0% WCHAN=futex_wait
+        └ thread TID=9567 STAT=SNl CPU=0.0% WCHAN=futex_wait
+2026-10-16 17:05:07.568   | 9343   | SNl  | 0.0    | 25       | 3       | 23s
+        └ thread TID=9343 STAT=SNl CPU=0.4% WCHAN=futex_wait
+        └ thread TID=9566 STAT=SNl CPU=0.0% WCHAN=futex_wait
+        └ thread TID=9567 STAT=SNl CPU=0.0% WCHAN=futex_wait
+2026-10-16 17:05:08.843   | 9343   | SNl  | 0.0    | 25       | 3       | 24s
+        └ thread TID=9343 STAT=SNl CPU=0.4% WCHAN=futex_wait
+        └ thread TID=9566 STAT=SNl CPU=0.0% WCHAN=futex_wait
+        └ thread TID=9567 STAT=SNl CPU=0.0% WCHAN=futex_wait
+2026-10-16 17:05:10.119   | 9343   | SNl  | 0.0    | 25       | 3       | 25s
+        └ thread TID=9343 STAT=SNl CPU=0.3% WCHAN=futex_wait
+        └ thread TID=9566 STAT=SNl CPU=0.0% WCHAN=futex_wait
+        └ thread TID=9567 STAT=SNl CPU=0.0% WCHAN=futex_wait
+2026-10-16 17:05:11.388   | 9343   | SNl  | 0.0    | 25       | 3       | 26s
+        └ thread TID=9343 STAT=SNl CPU=0.3% WCHAN=futex_wait
+        └ thread TID=9566 STAT=SNl CPU=0.0% WCHAN=futex_wait
+        └ thread TID=9567 STAT=SNl CPU=0.0% WCHAN=futex_wait
+2026-10-16 17:05:12.659   | 9343   | SNl  | 0.0    | 25       | 3       | 28s
+        └ thread TID=9343 STAT=SNl CPU=0.3% WCHAN=futex_wait
+        └ thread TID=9566 STAT=SNl CPU=0.0% WCHAN=futex_wait
+        └ thread TID=9567 STAT=SNl CPU=0.0% WCHAN=futex_wait
+2026-10-16 17:05:13.931   | 9343   | SNl  | 0.0    | 25       | 3       | 29s
+        └ thread TID=9343 STAT=SNl CPU=0.3% WCHAN=futex_wait
+        └ thread TID=9566 STAT=SNl CPU=0.0% WCHAN=futex_wait
+        └ thread TID=9567 STAT=SNl CPU=0.0% WCHAN=futex_wait
+2026-10-16 17:05:15.209   | 9343   | SNl  | 0.0    | 25       | 3       | 30s
+        └ thread TID=9343 STAT=SNl CPU=0.3% WCHAN=futex_wait
+        └ thread TID=9566 STAT=SNl CPU=0.0% WCHAN=futex_wait
+        └ thread TID=9567 STAT=SNl CPU=0.0% WCHAN=futex_wait
+2026-10-16 17:05:16.482   | 9343   | SNl  | 0.0    | 25       | 3       | 31s
+        └ thread TID=9343 STAT=SNl CPU=0.3% WCHAN=futex_wait
+        └ thread TID=9566 STAT=SNl CPU=0.0% WCHAN=futex_wait
+        └ thread TID=9567 STAT=SNl CPU=0.0% WCHAN=futex_wait
+2026-10-16 17:05:17.758   | 9343   | SNl  | 0.0    | 25       | 3       | 33s
+        └ thread TID=9343 STAT=SNl CPU=0.2% WCHAN=futex_wait
+        └ thread TID=9566 STAT=SNl CPU=0.0% WCHAN=futex_wait
+        └ thread TID=9567 STAT=SNl CPU=0.0% WCHAN=futex_wait
+2026-10-16 17:05:19.025   | 9343   | SNl  | 0.0    | 25       | 3       | 34s
+        └ thread TID=9343 STAT=SNl CPU=0.2% WCHAN=futex_wait
+        └ thread TID=9566 STAT=SNl CPU=0.0% WCHAN=futex_wait
+        └ thread TID=9567 STAT=SNl CPU=0.0% WCHAN=futex_wait
 [monitor.sh] 지정한 관측 시간(35s) 도달. 종료합니다.
-[monitor.sh] STOP 2026-07-13 21:45:13.093
+[monitor.sh] STOP 2026-10-16 17:05:20.160
